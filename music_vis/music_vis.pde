@@ -1,48 +1,67 @@
+import controlP5.*;
+
 import ddf.minim.signals.*;
 import ddf.minim.*;
 import ddf.minim.analysis.*;
 import ddf.minim.effects.*;
 import processing.serial.*;
 import ddf.minim.*;
-import java.lang.Object;
-import java.awt.Color;
+
 Minim minim;
 AudioPlayer song;
 BeatDetect beat;
 BeatListener bl;
 Serial myPort;
 
+ControlP5 cp5;
+ColorPicker cp;
 
 int br=0;
 boolean a=true;
-String mode = "brightsat";
+String mode = "sat";
 
-int chue=180;
-int csat=50;
+int chue=220;
+int csat=100;
 int cbright=100;
+//220 green blue
 
 void setup()
 {
   size(640, 480);
+
   minim = new Minim(this);
-  frameRate( 30 );
-  smooth();
-  song = minim.loadFile("wayward.mp3", 2048);
- 
-  beat = new BeatDetect(song.bufferSize(), song.sampleRate());
- 
-  beat.setSensitivity(100);
-  bl = new BeatListener(beat, song); 
+
  
   myPort = new Serial(this,"COM4",9600);
   myPort.bufferUntil('\n');
-  delay(3000);
-  song.play();
+ 
+  cp5 = new ControlP5(this);
   
-}
+  frameRate( 30 );
+  smooth();
+  song = minim.loadFile("tiger.mp3", 2048);
+  beat = new BeatDetect(song.bufferSize(), song.sampleRate());
+  beat.setSensitivity(100);
+  bl = new BeatListener(beat, song); 
+  
+  cp5.addButton("Play")
+    .setBroadcast(false)
+    .setPosition(300,200)
+    .setSize(50,20)
+    .setValue(0)
+    .setBroadcast(true)
+    ;  
+    
+  cp5.addButton("Stop")
+    .setBroadcast(false)
+    .setPosition(300,240)
+    .setSize(50,19)
+    .setValue(1)
+    .setBroadcast(true)
+    ;
+} 
 void draw()
 {
-  
   rect(0,0,100,100);
   rect(100,0,100,100);
   rect(200,0,100,100);
@@ -50,7 +69,6 @@ void draw()
   rect(400,0,100,100);
   rect(500,0,100,100);
   colorMode(HSB,360,100,100);
-  
    if(mode=="flash")
    {
 
@@ -232,6 +250,18 @@ int[] HSVtoRGB(float h, float s, float v)
   rgb[1]=int(b);
   rgb[2]=int(g);
   return rgb;
+}
+
+public void controlEvent(ControlEvent c) {
+}
+
+public void Play(int theValue) {
+  song.play();
+}
+
+public void Stop(int theValue) {
+  stop();
+  exit();
 }
 
 void stop()

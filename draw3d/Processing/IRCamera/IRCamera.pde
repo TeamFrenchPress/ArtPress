@@ -19,7 +19,8 @@ int gridX = -1, gridY = -1, gridZ = -1;
 
 int spin;
 
-boolean[][][] voxels; 
+boolean[][][] voxels;
+color[][][] voxelColors;
 
 void setup()
 {
@@ -32,6 +33,7 @@ void setup()
   //perspective(fov, float(width)/float(height),0.0f, 500f);
   
   voxels = new boolean[gridSize][gridSize][gridSize];
+  voxelColors = new int[gridSize][gridSize][gridSize];
 }
 
 void draw()
@@ -54,7 +56,7 @@ void draw()
   pushMatrix();
   //translate(512, 384, 50);
   
-  camera(0, 0, 0, (gridSize/2), (gridSize/2), (gridSize/2), 0, 1, 0);
+  camera(-2, 0, 0, (gridSize/2), (gridSize/2), (gridSize/2), 0, 1, 0);
   
   for (int x = 0; x < voxels.length; x++)
   {
@@ -65,6 +67,7 @@ void draw()
         if (voxels[x][y][z])
         {
           pushMatrix();
+          fill(voxelColors[x][y][z]);
           translate(x * voxelSize, y * voxelSize, z * voxelSize);
           //rotateY((spin / 20f));
           box(voxelSize);
@@ -77,13 +80,16 @@ void draw()
   noFill();
   stroke(255, 0, 0);
   
-  pushMatrix();
-  translate(gridX * voxelSize, gridY * voxelSize, gridZ * voxelSize);
-  box(voxelSize);
-  popMatrix();
-  
   if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize && gridZ >= 0 && gridZ < gridSize)
+  {
+    pushMatrix();
+    translate(gridX * voxelSize, gridY * voxelSize, gridZ * voxelSize);
+    box(voxelSize);
+    popMatrix();
+  
     voxels[gridX][gridY][gridZ] = true;
+    voxelColors[gridX][gridY][gridZ] = color(255 - int(float(gridX) / gridSize * 255), int(float(gridY) / gridSize * 255), 255 - int(float(gridZ) / gridSize * 255));
+  }
   
   popMatrix();
   

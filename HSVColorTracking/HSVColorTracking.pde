@@ -7,6 +7,7 @@ OpenCV opencv;
 ArrayList<Contour> contours;
 
 // <1> Set the range of Hue values for our filter
+//TODO: calibrate range expectancies by using data from music visualizer, that way we have a ballbark low and high to go off of. making this, not impossible.
 int rangeLow = 20;
 int rangeHigh = 35;
 

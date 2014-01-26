@@ -22,6 +22,7 @@ ColorPicker cp;
 DropdownList d1;
 
 
+boolean havePort=false;
 int br=0;
 boolean a=true;
 String mode="Fade";
@@ -57,8 +58,9 @@ void setup()
   beat = new BeatDetect(song.bufferSize(), song.sampleRate());
   beat.setSensitivity(100);
   bl = new BeatListener(beat, song); 
+  if(havePort){
   myPort = new Serial(this,com,9600);
-  myPort.bufferUntil('\n');
+  myPort.bufferUntil('\n');}
  
   cp5 = new ControlP5(this);
   
@@ -496,13 +498,14 @@ void draw()
   noStroke();
   colorMode(RGB,255);
   textSize(24);
-  PFont title;
-  PFont mainFont;
-  
+  PFont title, title2, mainFont;
   fill(255);
   title = loadFont("HarlowSolid-42.vlw");
+  title2 = loadFont("Gabriola-20.vlw");
   textFont(title);
   text("ArtPress", 450, 50);
+  textFont(title2);
+  text("by team FrenchPress",493,75);
   mainFont = loadFont("ACaslonPro-Bold-24.vlw");
   textFont(mainFont);
   text("mode:", 20, 30); 
@@ -510,12 +513,6 @@ void draw()
   text("color:", 20, 290); 
   text("song:",20,415);
   
-  /*rect(0,0,100,100);
-  rect(100,0,100,100);
-  rect(200,0,100,100);
-  rect(300,0,100,100);
-  rect(400,0,100,100);
-  rect(500,0,100,100);*/
   colorMode(HSB,360,100,100);
   if(paintbrush)
   { 
@@ -577,6 +574,7 @@ void send(float h, float s, float v)
 {
   colorMode(RGB,255,255,255);
   int[] rgb = HSVtoRGB(h,s,v);
+  if(havePort){
   if(myPort.available()>0) a=myPort.read()==97;
   if(a)
   {
@@ -586,7 +584,7 @@ void send(float h, float s, float v)
     myPort.write(byte((int)(rgb[1])));
     myPort.write(byte((int)(rgb[2])));
     a=false;
-  }
+  }}
   fill(rgb[0],rgb[1],rgb[2]);
   
   if (draw3dFrame != null)

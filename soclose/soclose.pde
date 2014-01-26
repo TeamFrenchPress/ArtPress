@@ -12,7 +12,8 @@ ArrayList<Integer> curveColors = new ArrayList<Integer>();
 color winning;
 
 void setup() {
-  size(640, 480);
+  size(1280, 720);
+  //size(640,480);
   video = new Capture(this, width, height);
   opencv = new OpenCV(this, width, height);
   //myPort = new Serial(this,"COM9",9600);
@@ -21,13 +22,19 @@ void setup() {
 }
 boolean drawnow = false;
 int locx,locy;
-int mod = 25;
+int mod = 35;
 
 void draw() {
   
   opencv.loadImage(video);
   image(video, 0, 0); 
   if(drawnow){
+  
+  //filter(ERODE);
+  // filter(POSTERIZE,180);
+  filter(DILATE);
+  filter(ERODE);
+ 
   PVector loc = opencv.max();
 
   locx = int(loc.x);
@@ -71,19 +78,27 @@ void draw() {
   tests.add(tempone);
   opencv.releaseROI();
   }
-  
+  noFill();
+  stroke(0);
+  //fill(0);
+ /* rect(locx-20-150,locy-75,150,150);
+  rect(locx+20,locy-75,150,150);
+  rect(locx-75,locy-150-20,150,150);
+  rect(locx-75,locy+20,150,150);*/
  //println(opencv.max());
   float highest = 0.0;
   PVector aux = new PVector();
   for(PVector v : tests)
   {//(abs(v.x - loc.x) < 75) && (abs(v.y - loc.y) < 75) &&(abs(v.x - loc.x) < 100) && (abs(v.y - loc.y) < 100) &&
-   if((brightness(get(int(v.x),int(v.y))) > highest))
+   println(abs(v.x - loc.x), abs(v.y - loc.y));
+   if((abs(v.x - loc.x) >5 || abs(v.y - loc.y) > 5) && (brightness(get(int(v.x),int(v.y))) > highest))
    {
     highest =  brightness(get(int(v.x),int(v.y)));
     aux = v;
    }
    else
    {
+     //this.draw();
    // println("ELSEWAT"); 
    }
   }
@@ -93,16 +108,18 @@ void draw() {
   
   float locbackupx = loc.x;
   float locbackupy = loc.y;
+  
   PVector hax = new PVector();
   hax = PVector.sub(loc,aux);
   hax.normalize();
-  hax.mult(7);
+  hax.mult(17);
   //println(loc);
   loc.add(hax);
 
   locx = int(loc.x);
   locy = int(loc.y);
-  //ellipse(int(aux.x),int(aux.y),8,8);
+  
+  ellipse(int(aux.x),int(aux.y),8,8);
   //opencv.setROI(locx,locy,19,19);
   //println(loc);
   //println(locx,locy);
@@ -113,7 +130,8 @@ void draw() {
   color nextcolor = color(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
   if(loc.x >= 0 && loc.y >= 0){
  // println(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
-  ////ellipse(locx,locy,8,8);
+  
+  ellipse(locx,locy,8,8);
     strokeWeight(2);
     
     if(winning != nextcolor)//nextcolor != opencv.in && nextcolor != slickblack  && winning != nextcolor)
@@ -127,7 +145,7 @@ void draw() {
     if(points.size() > p+1){
        stroke(int(curveColors.get(p)));
        fill(int(curveColors.get(p)));
-       //ellipse(points.get(p).x, points.get(p).y, 8, 8);
+       ellipse(points.get(p).x, points.get(p).y, 8, 8);
       line(points.get(p).x, points.get(p).y, points.get(p+1).x,points.get(p+1).y);
        //draw soicles in between them
     }

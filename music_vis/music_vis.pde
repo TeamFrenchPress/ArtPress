@@ -19,9 +19,8 @@ DropdownList d1;
 
 int br=0;
 boolean a=true;
-String mode="Fade";
+String mode;
 boolean paintbrush=false;
-String s_song="tiger.mp3";
 color backgroundColor=130;
 
 int chue=360;
@@ -29,10 +28,9 @@ int csat=100;
 int cbright=100;
 int cnt=0;
 
-String[] songs = {"Eye of the Tiger","Carry on my Wayward Son", "Burn", "Crystallize", "Demons", "Everybody Talks", "St. Jimmy"};
-String[] songMP3s = {"tiger.mp3","wayward.mp3","burn.mp3","crystallize.mp3","demons.mp3","everybodytalks.mp3","jimmy.mp3"};
+String[] songs = {"Eye of the Tiger","Carry on my Wayward Son", "Burn", "Crystallize","Don't Stop Believin", "Demons", "Everybody Talks", "St. Jimmy","You're Gonna Go Far Kid","Zelda"};
+String[] songMP3s = {"tiger.mp3","wayward.mp3","burn.mp3","crystallize.mp3","dontstopbelievin.mp3","demons.mp3","everybodytalks.mp3","jimmy.mp3","gofarkid.mp3","Zelda.mp3"};
 AudioPlayer[] songFiles = new AudioPlayer[songMP3s.length];
-//220 green blue
 
 void setup()
 {
@@ -46,13 +44,12 @@ void setup()
     songFiles[i]=minim.loadFile(songMP3s[i],2048);
   }
   song=songFiles[0];
-  //song = minim.loadFile("tiger.mp3", 2048);
   beat = new BeatDetect(song.bufferSize(), song.sampleRate());
   beat.setSensitivity(100);
   bl = new BeatListener(beat, song); 
   
-  myPort = new Serial(this,"COM4",9600);
-  myPort.bufferUntil('\n');
+  //myPort = new Serial(this,"COM4",9600);
+  //myPort.bufferUntil('\n');
  
   cp5 = new ControlP5(this);
   
@@ -314,7 +311,6 @@ void setup()
 } 
 
 void customize(DropdownList ddl) {
-  // a convenience function to customize a DropdownList
   ddl.setBackgroundColor(color(230));
   ddl.setItemHeight(25);
   ddl.setBarHeight(23);
@@ -322,10 +318,10 @@ void customize(DropdownList ddl) {
   ddl.captionLabel().style().marginTop = 7;
   ddl.captionLabel().style().marginLeft = 3;
   ddl.valueLabel().style().marginTop = 3;
-  for(int i=0;i<7;i++){
+  /*for(int i=0;i<7;i++){
     ddl.addItem(songs[i],i);
-  }
-  //ddl.addItems(songs);
+  }*/
+  ddl.addItems(songs);
   ddl.setColorBackground(color(60));
   ddl.setColorActive(color(255, 128));
   
@@ -447,26 +443,20 @@ void draw()
   noStroke();
   colorMode(RGB,255);
   textSize(24);
-  PFont title;
-  PFont mainFont;
-  
+  PFont title, title2, mainFont;
   fill(255);
   title = loadFont("HarlowSolid-42.vlw");
+  title2 = loadFont("Gabriola-20.vlw");
   textFont(title);
   text("ArtPress", 450, 50);
+  textFont(title2);
+  text("by team FrenchPress",493,75);
   mainFont = loadFont("ACaslonPro-Bold-24.vlw");
   textFont(mainFont);
   text("mode:", 20, 30); 
   text("saturation:", 20, 160); 
   text("color:", 20, 290); 
   text("song:",20,415);
-  
-  /*rect(0,0,100,100);
-  rect(100,0,100,100);
-  rect(200,0,100,100);
-  rect(300,0,100,100);
-  rect(400,0,100,100);
-  rect(500,0,100,100);*/
   colorMode(HSB,360,100,100);
   if(paintbrush)
   { 
@@ -528,7 +518,7 @@ void send(float h, float s, float v)
 {
   colorMode(RGB,255,255,255);
   int[] rgb = HSVtoRGB(h,s,v);
-    if(myPort.available()>0) a=myPort.read()==97;
+    /*if(myPort.available()>0) a=myPort.read()==97;
     if(a)
     {
       myPort.write(byte(0xa5));
@@ -537,7 +527,7 @@ void send(float h, float s, float v)
       myPort.write(byte(int(rgb[1])));
       myPort.write(byte(int(rgb[2])));
       a=false;
-    }
+    }*/
     fill(rgb[0],rgb[1],rgb[2]);
 }
 
@@ -545,7 +535,6 @@ int[] getHSB(String mode, int range)
 {
   int[] hsb = new int[3];
   int h=chue; int s=csat; int b=cbright;
-  //50, purple, 180, blue
   if(mode=="brightsat")
   {
       b=100;

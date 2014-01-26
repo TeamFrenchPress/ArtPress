@@ -18,10 +18,10 @@ ColorPicker cp;
 
 int br=0;
 boolean a=true;
-String mode = "flash";
+String mode="Fade";
 boolean paintbrush=false;
 
-int chue=0;
+int chue=220;
 int csat=100;
 int cbright=100;
 //220 green blue
@@ -30,7 +30,7 @@ void setup()
 {
   
   colorMode(HSB,360,100,100);
-  size(640, 480);
+  size(650, 500);
   background(0,50,100);
   minim = new Minim(this);
 
@@ -42,27 +42,69 @@ void setup()
   
   frameRate( 30 );
   smooth();
-  song = minim.loadFile("demons.mp3", 2048);
+  song = minim.loadFile("tiger.mp3", 2048);
   beat = new BeatDetect(song.bufferSize(), song.sampleRate());
   beat.setSensitivity(100);
   bl = new BeatListener(beat, song); 
   
-  colorMode(RGB,255);
-  textSize(24);
-  fill(255);
-  text("mode:", 10, 30); 
-  text("saturation:", 20, 160); 
-  text("color:", 20, 290); 
-
-  
-  colorMode(HSB,360,100,100);
-  
   CColor g = new CColor();
-  CColor ccol = new CColor();
   
+  PFont pfont = createFont("ACaslonPro-Bold",16,true); // use true/false for smooth/no-smooth
+  ControlFont font = new ControlFont(pfont,16);
+  colorMode(RGB);
+  g.setActive(color(180));
+  g.setBackground(color(200));
+  g.setForeground(color(220));
+  cp5.addButton("Fade")
+    .setBroadcast(false)
+    
+    .setColor(g)
+    .setPosition(20,45)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(-1)
+    .setBroadcast(true)
+    ;  
+  
+  cp5.addButton("Flash")
+    .setBroadcast(false)
+    
+    .setColor(g)
+    .setPosition(120,45)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(-1)
+    .setBroadcast(true)
+    ;  
+    
+  
+  cp5.addButton("Multicolor")
+    .setBroadcast(false)
+    
+    .setColor(g)
+    .setPosition(220,45)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(-1)
+    .setBroadcast(true)
+    ;  
+    
+   
+  cp5.addButton("Seizure")
+    .setBroadcast(false)
+    
+    .setColor(g)
+    .setPosition(320,45)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(-1)
+    .setBroadcast(true)
+    ;  
+    
   g.setActive(color(75));
   g.setBackground(color(50));
   g.setForeground(color(0));
+  
   cp5.addButton("Play")
     .setBroadcast(false)
     .setPosition(240,410)
@@ -93,7 +135,7 @@ void setup()
     .setBroadcast(true)
     ;
     
-  ccol.setActive(color(0,csat,cbright));
+  //ccol.setActive(color(0,csat,cbright));
   
   cp5.addButton("")
     .setBroadcast(false)
@@ -183,6 +225,46 @@ void setup()
     .setBroadcast(true)
     ;
     
+    
+  PFont pfont2 = createFont("Arial",16,true); // use true/false for smooth/no-smooth
+  ControlFont font2 = new ControlFont(pfont2,14);
+  
+  cp5.getController("50%")
+     .getCaptionLabel()
+     .setFont(font2)
+     .toUpperCase(false)
+     ;
+     
+  cp5.getController("100%")
+     .getCaptionLabel()
+     .setFont(font2)
+     .toUpperCase(false)
+     ;
+       cp5.getController("Fade")
+     .getCaptionLabel()
+     .setFont(font)
+     .toUpperCase(false)
+     ;
+   
+  cp5.getController("Flash")
+     .getCaptionLabel()
+     .setFont(font)
+     .toUpperCase(false)
+     ;
+   
+  cp5.getController("Multicolor")
+     .getCaptionLabel()
+     .setFont(font)
+     .toUpperCase(false)
+     ;
+  
+  cp5.getController("Seizure")
+     .getCaptionLabel()
+     .setFont(font)
+     .toUpperCase(false)
+     ;
+     
+    
   /*cp5.addCheckBox("CheckBox")
     .setPosition(100,200)
     .setSize(20,20)
@@ -221,6 +303,22 @@ public void Pause(int theValue) {
 public void Stop(int theValue) {
   stop();
   exit();
+}
+
+public void Fade(int theValue) {
+  mode="Fade";
+}
+
+public void Flash(int theValue) {
+  mode="Flash";
+}
+
+public void Multicolor(int theValue) {
+  mode="Multicolor";
+}
+
+public void Seizure(int theValue) {
+  mode="Seizure";
 }
 
 
@@ -278,6 +376,22 @@ void paintbrushMode()
 
 void draw()
 {
+  
+  colorMode(RGB,255);
+  textSize(24);
+  PFont title;
+  PFont mainFont;
+  
+  fill(255);
+  title = loadFont("HarlowSolid-42.vlw");
+  textFont(title);
+  text("ArtPress", 450, 50);
+  mainFont = loadFont("ACaslonPro-Bold-24.vlw");
+  textFont(mainFont);
+  text("mode:", 20, 30); 
+  text("saturation:", 20, 160); 
+  text("color:", 20, 290); 
+  
   /*rect(0,0,100,100);
   rect(100,0,100,100);
   rect(200,0,100,100);
@@ -290,7 +404,7 @@ void draw()
     paintbrushMode();
   }
   else{
-   if(mode=="flash")
+   if(mode=="Fade")
    {
 
      int h=chue; int s=csat;
@@ -375,7 +489,7 @@ int[] getHSB(String mode, int range)
         case 5: break;
       }
   }  
-  else if(mode=="bright")
+  else if(mode=="Flash")
   {
       b=100;
       switch(range){
@@ -386,7 +500,7 @@ int[] getHSB(String mode, int range)
         case 5: break;
       }
   }
-  else if(mode=="hue")
+  else if(mode=="Multicolor")
   {
     h=0;
     s=100;
@@ -409,7 +523,7 @@ int[] getHSB(String mode, int range)
         case 5: s-=90; break;
         }
   }
-  else if(mode=="random")
+  else if(mode=="Seizure")
   {
     s=100;
     h=int(random(360));

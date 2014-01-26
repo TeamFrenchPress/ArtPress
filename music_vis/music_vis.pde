@@ -35,6 +35,8 @@ int csat=100;
 int cbright=100;
 int cnt=0;
 
+int[] queuedSendColor;
+
 String[] songs = {"Eye of the Tiger","Carry on my Wayward Son", "Burn", "Crystallize","Don't Stop Believin'", "Demons", "Everybody Talks", "St. Jimmy","You're Gonna Go Far Kid","Zelda"};
 String[] songMP3s = {"tiger.mp3","wayward.mp3","burn.mp3","crystallize.mp3","dontstopbelievin.mp3","demons.mp3","everybodytalks.mp3","jimmy.mp3","gofarkid.mp3","Zelda.mp3"};
 AudioPlayer[] songFiles = new AudioPlayer[songMP3s.length];
@@ -573,22 +575,12 @@ void draw()
 void send(float h, float s, float v)
 {
   colorMode(RGB,255,255,255);
-  int[] rgb = HSVtoRGB(h,s,v);
-  if(havePort){
-  if(myPort.available()>0) a=myPort.read()==97;
-  if(a)
-  {
-    myPort.write(byte(0xa5));
-    myPort.write(byte(0xff));
-    myPort.write(byte((int)(rgb[0])));
-    myPort.write(byte((int)(rgb[1])));
-    myPort.write(byte((int)(rgb[2])));
-    a=false;
-  }}
-  fill(rgb[0],rgb[1],rgb[2]);
+  queuedSendColor = HSVtoRGB(h,s,v);
+  
+  fill(queuedSendColor[0],queuedSendColor[1],queuedSendColor[2]);
   
   if (draw3dFrame != null)
-    draw3dFrame.getApp().setCurrentColor(color(rgb[0], rgb[1], rgb[2]));
+    draw3dFrame.getApp().setCurrentColor(color(queuedSendColor[0], queuedSendColor[1], queuedSendColor[2]));
 }
 
 int[] getHSB(String mode, int range)
@@ -716,6 +708,40 @@ void stop()
   super.stop();
 }
  
+void serialEvent (Serial port)
+{
+  String s = port.readString();
+  s = trim(s);
+  println(s);
+  
+  if (s.equals("Draw") && draw3dFrame != null)
+  {
+    draw3dFrame.getApp().btnDown();
+  }
+  else if (s.equals("No Draw") && draw3dFrame != null)
+  {
+    draw3dFrame.getApp().btnUp();
+  }
+  else
+  {
+    myPort.write(byte(0xa5));
+    myPort.write(byte(0xff));
+    if (queuedSendColor != null)
+    {
+    myPort.write(byte((int)(queuedSendColor[0])));
+    myPort.write(byte((int)(queuedSendColor[1])));
+    myPort.write(byte((int)(queuedSendColor[2])));
+    }
+    else
+    {
+      myPort.write(byte(0));
+      myPort.write(byte(0));
+      myPort.write(byte(0));
+    }
+    println("WRITING");
+  }
+} 
+
 class BeatListener implements AudioListener
 {
   private BeatDetect beat;
@@ -800,6 +826,8 @@ public class Draw3DApp extends PApplet
   float gridRotY = HALF_PI;
   
   boolean isRotating = false;
+  boolean isDrawing = false;
+  boolean isRemoving = false;
   
   boolean[][][] voxels;
   color[][][] voxelColors;
@@ -815,7 +843,7 @@ public class Draw3DApp extends PApplet
   public void setup()
   {
     size(1024,768, P3D);
-    port = new Serial(this, "COM6", 9600);
+    port = new Serial(this, "COM7", 9600);
     port.bufferUntil('\n');
     float fov = PI/3;
     float cameraZ = (height/2.0) / tan(fov/2.0);
@@ -900,9 +928,16 @@ public class Draw3DApp extends PApplet
   
     if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize && gridZ >= 0 && gridZ < gridSize)
     {
-      voxels[gridX][gridY][gridZ] = true;
-      /*voxelColors[gridX][gridY][gridZ] = color(255 - (int)((float)gridX / gridSize * 255), (int)((float)gridY / gridSize * 255), 255 - (int)((float)gridZ / gridSize * 255));*/
-      voxelColors[gridX][gridY][gridZ] = curColor;
+      if (isDrawing)
+      {
+        voxels[gridX][gridY][gridZ] = true;
+        /*voxelColors[gridX][gridY][gridZ] = color(255 - (int)((float)gridX / gridSize * 255), (int)((float)gridY / gridSize * 255), 255 - (int)((float)gridZ / gridSize * 255));*/
+        voxelColors[gridX][gridY][gridZ] = curColor;
+      }
+      else if (isRemoving)
+      {
+        voxels[gridX][gridY][gridZ] = false;
+      }
     }
     
     popMatrix();
@@ -942,15 +977,15 @@ public class Draw3DApp extends PApplet
       float handY = sin(relativeVerticalAngle) * handDist;
 
       //rotate X axis
-      float tmpX = handX;
+      /*float tmpX = handX;
       float tmpY = handY * cos(gridRotY) - handDist * sin(gridRotY);
       float tmpZ = handY * sin(gridRotY) + handDist * cos(gridRotY);
       
       handX = tmpZ * cos(gridRotX) + tmpX * cos(gridRotX);
       handY = tmpY;
-      handDist = tmpZ * cos(gridRotX) - tmpX * cos(gridRotX);
+      handDist = tmpZ * cos(gridRotX) - tmpX * cos(gridRotX);*/
 
-      println("(" + handX + ", " + handY + ", " + handDist + ")");
+      //println("(" + handX + ", " + handY + ", " + handDist + ")");
       
       int driftX = gridX - prevGridX;
       int driftY = gridY - prevGridY;
@@ -1037,5 +1072,29 @@ public class Draw3DApp extends PApplet
   public void setCurrentColor(color c)
   {
     curColor = c;
+  }
+  
+  public void btnDown()
+  {
+    btnUp();
+    if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize && gridZ >= 0 && gridZ < gridSize)
+    {
+      if (voxels[gridX][gridY][gridZ])
+        isRemoving = true;
+      else
+        isDrawing = true;
+    }
+    else
+    {
+      isDrawing = true;
+    }
+    
+    println(isRemoving + ", " + isDrawing);
+  }
+  
+  public void btnUp()
+  {
+    isDrawing = false;
+    isRemoving = false;
   }
 }

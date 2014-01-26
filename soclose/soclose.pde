@@ -9,6 +9,7 @@ OpenCV opencv;
 Serial myPort;
 ArrayList<PVector> points = new ArrayList<PVector>();
 ArrayList<Integer> curveColors = new ArrayList<Integer>();
+ArrayList<Integer> intervals = new ArrayList<Integer>();
 color winning;
 
 void setup() {
@@ -28,22 +29,30 @@ int mod = 35;
 void draw() {
 
   opencv.loadImage(video);
-  pushMatrix();
-  scale(-1,1);
-  image(video.get(),-width,0);
-  popMatrix();
+  //pushMatrix();
+  //scale(-1,1);
+  //image(video.get(),-width,0);
+  //popMatrix();
+  
+  image(video.get(),0,0);
+
   if(drawnow){
   
   //filter(ERODE);
   // filter(POSTERIZE,180);
-  filter(DILATE);
-  filter(ERODE);
+  //filter(DILATE);
+  //filter(ERODE);
  //filter(POSTERIZE,240);
   PVector loc = opencv.max();
 
   locx = int(loc.x);
   locy = int(loc.y);
- 
+  if(brightness(get(int(loc.x),int(loc.y))) < 230)
+  {
+    drawHistory();
+    return;
+  }
+ /*
   //rect(100,100,25,25);
   ArrayList<PVector> tests = new ArrayList<PVector>();
  // println(opencv.setROI(100,100,25,25));
@@ -85,10 +94,10 @@ void draw() {
   //noFill();
   //stroke(0);
   //fill(0);
- /* rect(locx-20-150,locy-75,150,150);
+  rect(locx-20-150,locy-75,150,150);
   rect(locx+20,locy-75,150,150);
   rect(locx-75,locy-150-20,150,150);
-  rect(locx-75,locy+20,150,150);*/
+  rect(locx-75,locy+20,150,150);
  //println(opencv.max());
   float highest = 0.0;
   PVector aux = new PVector();
@@ -107,23 +116,46 @@ void draw() {
    }
   }
   //println(second);
+  */
   
   
+
+  
+  /*hax = PVector.sub(loc,aux);
+  hax.normalize();
+  hax.mult(10);
+  //println(loc);
+  //loc.add(hax);
+  */
+  //loc.x = width-loc.x;
+
+  locx = int(loc.x);
+  locy = int(loc.y);
+  //aux.x = width-aux.x;
+  /*if (points.size() >0){
+    if (dist(loc.x,loc.y,points.get(points.size()-1 ).x,points.get(points.size()-1 ).y) > dist(aux.x,aux.y,points.get(points.size()-1 ).x,points.get(points.size()-1 ).y) )
+    {
+      PVector temp = new PVector(aux.x,aux.y);
+      aux = loc;
+      loc = temp;
+    }
+  }*/
+  
+  //ellipse(int(aux.x),int(aux.y),8,8);
   
   float locbackupx = loc.x;
   float locbackupy = loc.y;
   
-  PVector hax = new PVector();
-  hax = PVector.sub(loc,aux);
-  hax.normalize();
-  hax.mult(17);
-  //println(loc);
-  loc.add(hax);
-
-  locx = int(loc.x);
-  locy = int(loc.y);
   
-  ellipse(int(aux.x),int(aux.y),8,8);
+ // PVector hax = new PVector();
+  //hax = PVector.sub(loc,aux);
+  //hax.normalize();
+  //hax.mult(15);
+  //println(loc);
+  //loc.add(hax);
+  loc.x+=5;
+  
+ 
   //opencv.setROI(locx,locy,19,19);
   //println(loc);
   //println(locx,locy);
@@ -147,20 +179,12 @@ void draw() {
     
   }
   
-  for(int p=0; p<points.size(); p++)
-  {   
-    if(points.size() > p+1){
-       stroke(int(curveColors.get(p)));
-       fill(int(curveColors.get(p)));
-       //ellipse(points.get(p).x, points.get(p).y, 8, 8);
-      line(points.get(p).x, points.get(p).y, points.get(p+1).x,points.get(p+1).y);
-       //draw soicles in between them
-    }
-  }
+  drawHistory();
   
   points.add(new PVector(locbackupx,locbackupy));
   //olor test = color(red(winning),green(winning),blue(winning),alpha(winning)-1);
   curveColors.add(winning);
+  intervals.add(int(millis()));
   //stroke(winning);
   
   }
@@ -175,4 +199,23 @@ void keyPressed()
 }
 void captureEvent(Capture c) {
   c.read();
+}
+
+void drawHistory()
+{
+  for(int p=0; p<points.size(); p++)
+  {   
+    if(points.size() > p+1){
+      stroke(int(curveColors.get(p)));
+      fill(int(curveColors.get(p)));
+      strokeWeight(8);
+      if(intervals.get(p+1) - intervals.get(p) < 1000)
+      {
+        line(points.get(p).x, points.get(p).y, points.get(p+1).x,points.get(p+1).y);
+      }
+      strokeWeight(1);
+      ellipse(points.get(p).x, points.get(p).y, 8, 8);
+       //draw soicles in between them
+    }
+  }
 }

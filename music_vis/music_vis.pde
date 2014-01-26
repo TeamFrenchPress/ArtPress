@@ -24,8 +24,9 @@ DropdownList d1;
 
 int br=0;
 boolean a=true;
-String mode;
+String mode="Fade";
 boolean paintbrush=false;
+String s_song="tiger.mp3";
 color backgroundColor=130;
 
 int chue=360;
@@ -36,6 +37,7 @@ int cnt=0;
 String[] songs = {"Eye of the Tiger","Carry on my Wayward Son", "Burn", "Crystallize","Don't Stop Believin'", "Demons", "Everybody Talks", "St. Jimmy","You're Gonna Go Far Kid","Zelda"};
 String[] songMP3s = {"tiger.mp3","wayward.mp3","burn.mp3","crystallize.mp3","dontstopbelievin.mp3","demons.mp3","everybodytalks.mp3","jimmy.mp3","gofarkid.mp3","Zelda.mp3"};
 AudioPlayer[] songFiles = new AudioPlayer[songMP3s.length];
+//220 green blue
 
 Draw3DFrame draw3dFrame;
 
@@ -51,10 +53,10 @@ void setup()
     songFiles[i]=minim.loadFile(songMP3s[i],2048);
   }
   song=songFiles[0];
+  //song = minim.loadFile("tiger.mp3", 2048);
   beat = new BeatDetect(song.bufferSize(), song.sampleRate());
   beat.setSensitivity(100);
   bl = new BeatListener(beat, song); 
-  
   myPort = new Serial(this,com,9600);
   myPort.bufferUntil('\n');
  
@@ -357,6 +359,7 @@ void setup()
 } 
 
 void customize(DropdownList ddl) {
+  // a convenience function to customize a DropdownList
   ddl.setBackgroundColor(color(230));
   ddl.setItemHeight(25);
   ddl.setBarHeight(23);
@@ -364,10 +367,10 @@ void customize(DropdownList ddl) {
   ddl.captionLabel().style().marginTop = 7;
   ddl.captionLabel().style().marginLeft = 3;
   ddl.valueLabel().style().marginTop = 3;
-  /*for(int i=0;i<7;i++){
+  for(int i=0;i<7;i++){
     ddl.addItem(songs[i],i);
-  }*/
-  ddl.addItems(songs);
+  }
+  //ddl.addItems(songs);
   ddl.setColorBackground(color(60));
   ddl.setColorActive(color(255, 128));
   
@@ -493,20 +496,26 @@ void draw()
   noStroke();
   colorMode(RGB,255);
   textSize(24);
-  PFont title, title2, mainFont;
+  PFont title;
+  PFont mainFont;
+  
   fill(255);
   title = loadFont("HarlowSolid-42.vlw");
-  title2 = loadFont("Gabriola-20.vlw");
   textFont(title);
   text("ArtPress", 450, 50);
-  textFont(title2);
-  text("by team FrenchPress",493,75);
   mainFont = loadFont("ACaslonPro-Bold-24.vlw");
   textFont(mainFont);
   text("mode:", 20, 30); 
   text("saturation:", 20, 160); 
   text("color:", 20, 290); 
   text("song:",20,415);
+  
+  /*rect(0,0,100,100);
+  rect(100,0,100,100);
+  rect(200,0,100,100);
+  rect(300,0,100,100);
+  rect(400,0,100,100);
+  rect(500,0,100,100);*/
   colorMode(HSB,360,100,100);
   if(paintbrush)
   { 
@@ -568,23 +577,27 @@ void send(float h, float s, float v)
 {
   colorMode(RGB,255,255,255);
   int[] rgb = HSVtoRGB(h,s,v);
-    /*if(myPort.available()>0) a=myPort.read()==97;
-    if(a)
-    {
-      myPort.write(byte(0xa5));
-      myPort.write(byte(0xff));
-      myPort.write(byte((int)(rgb[0])));
-      myPort.write(byte((int)(rgb[1])));
-      myPort.write(byte((int)(rgb[2])));
-      a=false;
-    }*/
-    fill(rgb[0],rgb[1],rgb[2]);
+  if(myPort.available()>0) a=myPort.read()==97;
+  if(a)
+  {
+    myPort.write(byte(0xa5));
+    myPort.write(byte(0xff));
+    myPort.write(byte((int)(rgb[0])));
+    myPort.write(byte((int)(rgb[1])));
+    myPort.write(byte((int)(rgb[2])));
+    a=false;
+  }
+  fill(rgb[0],rgb[1],rgb[2]);
+  
+  if (draw3dFrame != null)
+    draw3dFrame.getApp().setCurrentColor(color(rgb[0], rgb[1], rgb[2]));
 }
 
 int[] getHSB(String mode, int range)
 {
   int[] hsb = new int[3];
   int h=chue; int s=csat; int b=cbright;
+  //50, purple, 180, blue
   if(mode=="brightsat")
   {
       b=100;
@@ -737,13 +750,20 @@ class BeatListener implements AudioListener
 
 public class Draw3DFrame extends Frame
 {
+  Draw3DApp app;
+  
   public Draw3DFrame()
   {
     setBounds(0, 0, 1024, 768);
-    Draw3DApp app = new Draw3DApp();
+    app = new Draw3DApp();
     add(app);
     app.init();
     show();
+  }
+  
+  public Draw3DApp getApp()
+  {
+    return app;
   }
 }
 
@@ -786,6 +806,8 @@ public class Draw3DApp extends PApplet
   boolean[][][] voxels;
   color[][][] voxelColors;
   
+  color curColor;
+  
   public Draw3DApp()
   {
     voxels = new boolean[gridSize][gridSize][gridSize];
@@ -805,7 +827,7 @@ public class Draw3DApp extends PApplet
   
   public void draw()
   {
-    background(0,0,0);
+    background(209,209,209);
     fill(255,255,255);
     if (size1>0)
     ellipse(x1,y1,size1,size1);
@@ -861,7 +883,8 @@ public class Draw3DApp extends PApplet
           if (voxels[x][y][z])
           {
             noStroke();
-            fill(voxelColors[x][y][z]);
+            //fill(voxelColors[x][y][z]);
+            fill(curColor);
             translate(x * voxelSize, y * voxelSize, z * voxelSize);
             box(voxelSize);
           }
@@ -880,7 +903,8 @@ public class Draw3DApp extends PApplet
     if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize && gridZ >= 0 && gridZ < gridSize)
     {
       voxels[gridX][gridY][gridZ] = true;
-      voxelColors[gridX][gridY][gridZ] = color(255 - (int)((float)gridX / gridSize * 255), (int)((float)gridY / gridSize * 255), 255 - (int)((float)gridZ / gridSize * 255));
+      /*voxelColors[gridX][gridY][gridZ] = color(255 - (int)((float)gridX / gridSize * 255), (int)((float)gridY / gridSize * 255), 255 - (int)((float)gridZ / gridSize * 255));*/
+      voxelColors[gridX][gridY][gridZ] = curColor;
     }
     
     popMatrix();
@@ -1010,5 +1034,10 @@ public class Draw3DApp extends PApplet
         }
       }
     }
+  }
+  
+  public void setCurrentColor(color c)
+  {
+    curColor = c;
   }
 }

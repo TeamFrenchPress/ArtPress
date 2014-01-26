@@ -15,9 +15,16 @@ float ledDistance = 34.036f; //in mm
 float voxelSize = 10;
 int gridSize = 20;
 
+int prevGridX = -1, prevGridY = -1, prevGridZ = -1;
 int gridX = -1, gridY = -1, gridZ = -1;
+int glitchesSkipped = 0;
+float maxDrift = voxelSize * 0.25f;
+float glitchDrift = 3f;
+int maxGlitches = 3;
 
 int spin;
+
+float cameraAng = 30f;
 
 boolean[][][] voxels;
 color[][][] voxelColors;
@@ -57,6 +64,7 @@ void draw()
   //translate(512, 384, 50);
   
   camera(/*voxelSize * (gridSize + 1)*/ -voxelSize * 3, /*voxelSize * (gridSize + 1)*/ -voxelSize * 4, voxelSize * (gridSize + 5), (gridSize/2) * voxelSize, (gridSize/2) * voxelSize, (gridSize/2) * voxelSize, 0, 1, 0);
+  //camera(cos(cameraAng) * -voxelSize * 5, -voxelSize * 4, sin(cameraAng) * -voxelSize * 5, (gridSize/2) * voxelSize, (gridSize/2) * voxelSize, (gridSize/2) * voxelSize, 0, 1, 0);
   
   /*int end = int(gridSize * voxelSize);
   stroke(255, 255, 255);
@@ -120,6 +128,8 @@ void draw()
   popMatrix();
   
   spin++;
+  cameraAng += 0.1f;
+  cameraAng %= 360;
 }
 
 void serialEvent (Serial port)
@@ -149,24 +159,48 @@ void serialEvent (Serial port)
     int dy = y2 - y1;
     float distance = sqrt(dx*dx + dy*dy);
     float angle = radsPerPixel * distance / 2;
-    float headDist = (ledDistance / 2) / tan(angle);
+    float handDist = (ledDistance / 2) / tan(angle);
     
     float ptX = (x1 + x2) * 0.5f;
     float ptY = (y1 + y2) * 0.5f;
     
-    float headX = sin(radsPerPixel * (ptX - 512)) * headDist;
+    float handX = sin(radsPerPixel * (ptX - 512)) * handDist;
     
     float relativeVerticalAngle = (ptY - 384) * radsPerPixel;
-    float headY = sin(relativeVerticalAngle) * headDist;
+    float handY = sin(relativeVerticalAngle) * handDist;
     
-    println("(" + headX + ", " + headY + ", " + headDist + ")");
+    //println("(" + headX + ", " + headY + ", " + headDist + ")");
     
-    gridX = int(headX / voxelSize) + (gridSize/2);
-    gridY = int(headY / voxelSize) + (gridSize/2);
-    gridZ = int(headDist / voxelSize) - gridSize;
+    int driftX = gridX - prevGridX;
+    int driftY = gridY - prevGridY;
+    int driftZ = gridZ - prevGridZ;
+    
+    float driftXZ = sqrt(driftX*driftX + driftZ*driftZ);
+    float drift = sqrt(driftY*driftY + driftXZ*driftXZ);
+   
+    if (drift >= glitchDrift)
+      glitchesSkipped++;
+      
+    if (drift <= maxDrift || glitchesSkipped > maxGlitches)
+    {
+      prevGridX = gridX;
+      prevGridY = gridY;
+      prevGridZ = gridZ;
+      
+      gridX = int(handX / voxelSize) + (gridSize/2);
+      gridY = int(handY / voxelSize) + (gridSize/2);
+      gridZ = int(handDist / voxelSize) - gridSize;
+      
+      glitchesSkipped = 0;
+    }
   }
   else 
   {
     size2=0;
   }
+}
+
+void keyPressed()
+{
+  
 }

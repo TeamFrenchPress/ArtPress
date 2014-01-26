@@ -35,8 +35,8 @@ void setup()
   minim = new Minim(this);
 
  
-  //myPort = new Serial(this,"COM4",9600);
-  //myPort.bufferUntil('\n');
+  myPort = new Serial(this,"COM4",9600);
+  myPort.bufferUntil('\n');
  
   cp5 = new ControlP5(this);
   
@@ -345,7 +345,7 @@ void send(float h, float s, float v)
 {
   colorMode(RGB,255,255,255);
   int[] rgb = HSVtoRGB(h,s,v);
-    /*if(myPort.available()>0) a=myPort.read()==97;
+    if(myPort.available()>0) a=myPort.read()==97;
     if(a)
     {
       myPort.write(byte(0xa5));
@@ -354,7 +354,7 @@ void send(float h, float s, float v)
       myPort.write(byte(int(rgb[1])));
       myPort.write(byte(int(rgb[2])));
       a=false;
-    }*/
+    }
     fill(rgb[0],rgb[1],rgb[2]);
 }
 

@@ -9,13 +9,17 @@ import ddf.minim.*;
 
 import java.awt.Frame;
 
+import gab.opencv.*;
+import processing.video.*;
+import java.util.*;
+
 Minim minim;
 AudioPlayer song;
 BeatDetect beat;
 BeatListener bl;
 Serial myPort;
 
-String com="COM4";
+String com="COM9";
 
 ControlP5 cp5;
 ColorPicker cp;
@@ -42,6 +46,7 @@ AudioPlayer[] songFiles = new AudioPlayer[songMP3s.length];
 //220 green blue
 
 Draw3DFrame draw3dFrame;
+LightGraffitiFrame lightGraffitiFrame;
 
 void setup()
 {
@@ -134,7 +139,7 @@ void setup()
     .setPosition(425,545)
     .setSize(175,60)
     .setValue(0)
-    .setId(-1)
+    .setId(-69)
     .setColor(g)
     .setBroadcast(true)
     ;  
@@ -432,7 +437,11 @@ public void controlEvent(ControlEvent c) {
   else if(c.getController().getId()==-50)
   {
     csat=50;
-  }  
+  }
+  else if (c.getController().getId() == -69)
+  {
+    LightGraffiti(1337);
+  }
   }
   else if (c.isGroup()) {
     // check if the Event was triggered from a ControlGroup
@@ -486,6 +495,10 @@ public void OFF(int theValue){
 
 public void Draw3D(int theValue) {
   draw3dFrame = new Draw3DFrame();
+}
+
+public void LightGraffiti(int theValue) {
+  lightGraffitiFrame = new LightGraffitiFrame();
 }
 
 CColor setCCol(int h)
@@ -754,15 +767,16 @@ void serialEvent (Serial port)
 {
   String s = port.readString();
   s = trim(s);
-  println(s);
-  
-  if (s.equals("Draw") && draw3dFrame != null)
+
+  if (s.equals("D") && draw3dFrame != null)
   {
     draw3dFrame.getApp().btnDown();
+    delay(5);
   }
-  else if (s.equals("No Draw") && draw3dFrame != null)
+  else if (s.equals("ND") && draw3dFrame != null)
   {
     draw3dFrame.getApp().btnUp();
+    delay(5);
   }
   else
   {
@@ -784,7 +798,6 @@ void serialEvent (Serial port)
       myPort.write(byte(0));
       myPort.write(byte(0));
     }
-    println("WRITING");
   }
 } 
 
@@ -993,6 +1006,8 @@ public class Draw3DApp extends PApplet
   
   public void serialEvent (Serial port)
   {
+    try
+    {
     String s = port.readString();
     s = trim(s);
     //println(s);
@@ -1096,6 +1111,10 @@ public class Draw3DApp extends PApplet
       size2=0;
       isRotating = false;
     }
+    }
+    catch (Exception e)
+    {
+    }
   }
   
   public void keyPressed()
@@ -1142,5 +1161,244 @@ public class Draw3DApp extends PApplet
   {
     isDrawing = false;
     isRemoving = false;
+    
+  }
+}
+
+public class LightGraffitiFrame extends Frame
+{
+  LightGraffitiApp app;
+  
+  public LightGraffitiFrame()
+  {
+    setBounds(0, 0, 1024, 768);
+    app = new LightGraffitiApp();
+    add(app);
+    app.init();
+    show();
+  }
+  
+  public LightGraffitiApp getApp()
+  {
+    return app;
+  }
+}
+
+public class LightGraffitiApp extends PApplet
+{
+  Capture video;
+  OpenCV opencv;
+  Serial myPort;
+  ArrayList<PVector> points = new ArrayList<PVector>();
+  ArrayList<Integer> curveColors = new ArrayList<Integer>();
+  ArrayList<Integer> intervals = new ArrayList<Integer>();
+  color winning;
+  
+  void setup() {
+    size(1280, 720,P2D);
+    //size(640,480);
+    video = new Capture(this, width, height);
+    opencv = new OpenCV(this, width, height);
+    //myPort = new Serial(this,"COM9",9600);
+    smooth();
+    //myPort.wr
+    video.start();
+  }
+  boolean drawnow = false;
+  int locx,locy;
+  int mod = 35;
+  
+  void draw() {
+  
+    opencv.loadImage(video);
+    //pushMatrix();
+    //scale(-1,1);
+    //image(video.get(),-width,0);
+    //popMatrix();
+    
+    image(video.get(),0,0);
+  
+    if(drawnow){
+    
+    //filter(ERODE);
+    // filter(POSTERIZE,180);
+    //filter(DILATE);
+    //filter(ERODE);
+   //filter(POSTERIZE,240);
+    PVector loc = opencv.max();
+  
+    locx = (int)(loc.x);
+    locy = (int)(loc.y);
+    if(brightness(get((int)(loc.x),(int)(loc.y))) < 230)
+    {
+      drawHistory();
+      return;
+    }
+   /*
+    //rect(100,100,25,25);
+    ArrayList<PVector> tests = new ArrayList<PVector>();
+   // println(opencv.setROI(100,100,25,25));
+    //println(opencv.max());
+    if(opencv.setROI(locx-mod-150,locy-75,150,150)){
+    //println(opencv.max());
+    PVector tempone = opencv.max();
+    tempone.x += locx-mod-150;
+    tempone.y += locy-75;
+    tests.add(tempone);
+    opencv.releaseROI();
+    }
+    
+    if(opencv.setROI(locx+mod,locy-75,150,150)){
+    //println(opencv.max());
+    PVector tempone = opencv.max();
+    tempone.x += locx+mod;
+    tempone.y += locy-75;
+    tests.add(tempone);
+    opencv.releaseROI();
+    }
+    
+    if(opencv.setROI(locx-75,locy-150-mod,150,150)){
+    //println(opencv.max());
+    PVector tempone = opencv.max();
+    tempone.x += locx-75;
+    tempone.y += locy-150-mod;
+    tests.add(tempone);
+    opencv.releaseROI();
+    }
+    if(opencv.setROI(locx-75,locy+mod,150,150)){
+    //println(opencv.max());
+    PVector tempone = opencv.max();
+    tempone.x += locx-75;
+    tempone.y += locy+mod;
+    tests.add(tempone);
+    opencv.releaseROI();
+    }
+    //noFill();
+    //stroke(0);
+    //fill(0);
+    rect(locx-20-150,locy-75,150,150);
+    rect(locx+20,locy-75,150,150);
+    rect(locx-75,locy-150-20,150,150);
+    rect(locx-75,locy+20,150,150);
+   //println(opencv.max());
+    float highest = 0.0;
+    PVector aux = new PVector();
+    for(PVector v : tests)
+    {//(abs(v.x - loc.x) < 75) && (abs(v.y - loc.y) < 75) &&(abs(v.x - loc.x) < 100) && (abs(v.y - loc.y) < 100) &&
+     //println(abs(v.x - loc.x), abs(v.y - loc.y));
+     if((abs(v.x - loc.x) >5 || abs(v.y - loc.y) > 5) && (brightness(get(int(v.x),int(v.y))) > highest))
+     {
+      highest =  brightness(get(int(v.x),int(v.y)));
+      aux = v;
+     }
+     else
+     {
+       //this.draw();
+     // println("ELSEWAT"); 
+     }
+    }
+    //println(second);
+    */
+    
+    
+  
+    
+    /*hax = PVector.sub(loc,aux);
+    hax.normalize();
+    hax.mult(10);
+    //println(loc);
+    //loc.add(hax);
+    */
+    //loc.x = width-loc.x;
+  
+    locx = (int)(loc.x);
+    locy = (int)(loc.y);
+    //aux.x = width-aux.x;
+    /*if (points.size() >0){
+      if (dist(loc.x,loc.y,points.get(points.size()-1 ).x,points.get(points.size()-1 ).y) > dist(aux.x,aux.y,points.get(points.size()-1 ).x,points.get(points.size()-1 ).y) )
+      {
+        PVector temp = new PVector(aux.x,aux.y);
+        aux = loc;
+        loc = temp;
+      }
+    }*/
+    
+    //ellipse(int(aux.x),int(aux.y),8,8);
+    
+    float locbackupx = loc.x;
+    float locbackupy = loc.y;
+    
+    
+   // PVector hax = new PVector();
+    //hax = PVector.sub(loc,aux);
+    //hax.normalize();
+    //hax.mult(15);
+    //println(loc);
+    //loc.add(hax);
+    loc.x+=5;
+    
+   
+    //opencv.setROI(locx,locy,19,19);
+    //println(loc);
+    //println(locx,locy);
+    //
+    /*color demoncolor = color(red(247),green(247),blue(247));
+    color fuckthisshit = color(red(246),green(246),blue(246));
+    color slickblack = color(red(0),green(0),blue(0));*/
+    color nextcolor = color(red(color(get((int)(loc.x),(int)(loc.y)))),green(color(get((int)(loc.x),(int)(loc.y)))),blue(color(get((int)(loc.x),(int)(loc.y)))));
+    if(loc.x >= 0 && loc.y >= 0){
+   // println(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
+    
+    ellipse(locx,locy,8,8);
+      strokeWeight(3);
+      
+      if(winning != nextcolor)//nextcolor != opencv.in && nextcolor != slickblack  && winning != nextcolor)
+      {
+        //println(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
+        winning = color(red(color(get((int)(loc.x),(int)(loc.y)))),green(color(get((int)(loc.x),(int)(loc.y)))),blue(color(get((int)(loc.x),(int)(loc.y)))));
+        
+      }
+      
+    }
+    
+    drawHistory();
+    
+    points.add(new PVector(locbackupx,locbackupy));
+    //olor test = color(red(winning),green(winning),blue(winning),alpha(winning)-1);
+    curveColors.add(winning);
+    intervals.add((int)(millis()));
+    //stroke(winning);
+    
+    }
+  }
+  void keyPressed()
+  {
+    switch(key){
+    case 'c': points.clear(); curveColors.clear();
+    default: drawnow = !drawnow; 
+    }
+   
+  }
+  void captureEvent(Capture c) {
+    c.read();
+  }
+  
+  void drawHistory()
+  {
+    for(int p=0; p<points.size(); p++)
+    {   
+      if(points.size() > p+1){
+        stroke((int)(curveColors.get(p)));
+        fill((int)(curveColors.get(p)));
+        strokeWeight(8);
+        if(intervals.get(p+1) - intervals.get(p) < 1000)
+        {
+          line(points.get(p).x, points.get(p).y, points.get(p+1).x,points.get(p+1).y);
+        }
+        strokeWeight(1);
+        ellipse(points.get(p).x, points.get(p).y, 8, 8);
+         //draw soicles in between them
+      }
+    }
   }
 }

@@ -24,7 +24,7 @@ boolean paintbrush=false;
 String s_song="tiger.mp3";
 color backgroundColor=130;
 
-int chue=220;
+int chue=360;
 int csat=100;
 int cbright=100;
 int cnt=0;
@@ -51,8 +51,8 @@ void setup()
   beat.setSensitivity(100);
   bl = new BeatListener(beat, song); 
   
-  //myPort = new Serial(this,"COM4",9600);
-  //myPort.bufferUntil('\n');
+  myPort = new Serial(this,"COM4",9600);
+  myPort.bufferUntil('\n');
  
   cp5 = new ControlP5(this);
   
@@ -112,7 +112,7 @@ void setup()
     
   cp5.addButton("Robert's Button")
     .setBroadcast(false)
-    .setPosition(20,600)
+    .setPosition(20,650)
     .setSize(80,20)
     .setValue(0)
     .setId(-1)
@@ -122,7 +122,7 @@ void setup()
     
   cp5.addButton("Michael's Button")
     .setBroadcast(false)
-    .setPosition(120,600)
+    .setPosition(120,650)
     .setSize(80,20)
     .setValue(0)
     .setId(-1)
@@ -131,7 +131,6 @@ void setup()
     ;  
     cp5.addButton("Fade")
     .setBroadcast(false)
-    
     .setColor(g)
     .setPosition(20,45)
     .setSize(90,90)
@@ -143,7 +142,6 @@ void setup()
   
   cp5.addButton("Flash")
     .setBroadcast(false)
-    
     .setColor(g)
     .setPosition(120,45)
     .setSize(90,90)
@@ -154,9 +152,8 @@ void setup()
     ((Button)(cp5.getController("Flash"))).captionLabel().style().marginLeft = 20;
     
   
-  cp5.addButton("Multicolor")
+  cp5.addButton("Multi")
     .setBroadcast(false)
-    
     .setColor(g)
     .setPosition(220,45)
     .setSize(90,90)
@@ -164,12 +161,11 @@ void setup()
     .setId(-1)
     .setBroadcast(true)
     ;  
-    ((Button)(cp5.getController("Multicolor"))).captionLabel().style().marginLeft = 10;
+    ((Button)(cp5.getController("Multi"))).captionLabel().style().marginLeft = 23;
     
    
   cp5.addButton("Seizure")
     .setBroadcast(false)
-    
     .setColor(g)
     .setPosition(320,45)
     .setSize(90,90)
@@ -286,6 +282,7 @@ void setup()
      .getCaptionLabel()
      .setFont(font2)
      .toUpperCase(false)
+     
      ;
    
   cp5.getController("Flash")
@@ -294,7 +291,7 @@ void setup()
      .toUpperCase(false)
      ;
    
-  cp5.getController("Multicolor")
+  cp5.getController("Multi")
      .getCaptionLabel()
      .setFont(font2)
      .toUpperCase(false)
@@ -384,8 +381,8 @@ public void Flash(int theValue) {
   mode="Flash";
 }
 
-public void Multicolor(int theValue) {
-  mode="Multicolor";
+public void Multi(int theValue) {
+  mode="Multi";
 }
 
 public void Seizure(int theValue) {
@@ -531,8 +528,8 @@ void send(float h, float s, float v)
 {
   colorMode(RGB,255,255,255);
   int[] rgb = HSVtoRGB(h,s,v);
-    //if(myPort.available()>0) a=myPort.read()==97;
-    /*if(a)
+    if(myPort.available()>0) a=myPort.read()==97;
+    if(a)
     {
       myPort.write(byte(0xa5));
       myPort.write(byte(0xff));
@@ -540,7 +537,7 @@ void send(float h, float s, float v)
       myPort.write(byte(int(rgb[1])));
       myPort.write(byte(int(rgb[2])));
       a=false;
-    }*/
+    }
     fill(rgb[0],rgb[1],rgb[2]);
 }
 
@@ -572,7 +569,7 @@ int[] getHSB(String mode, int range)
         case 5: break;
       }
   }
-  else if(mode=="Multicolor")
+  else if(mode=="Multi")
   {
     h=0;
     s=100;

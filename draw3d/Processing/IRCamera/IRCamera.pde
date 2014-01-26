@@ -113,13 +113,6 @@ void draw()
           translate(x * voxelSize, y * voxelSize, z * voxelSize);
           box(voxelSize);
         }
-        else if (x % 3 == 0 && y % 3 == 0 && z % 3 == 0)
-        {
-          /*noFill();
-          translate(x * voxelSize, y * voxelSize, z * voxelSize);
-          box(voxelSize);*/
-        }
-        
         popMatrix();
       }
     }
@@ -127,13 +120,14 @@ void draw()
   
   noFill();
   stroke(255, 0, 0);
-  
-  if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize && gridZ >= 0 && gridZ < gridSize)
-  {
-    pushMatrix();
+  pushMatrix();
     translate(gridX * voxelSize, gridY * voxelSize, gridZ * voxelSize);
     box(voxelSize);
     popMatrix();
+  
+  if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize && gridZ >= 0 && gridZ < gridSize)
+  {
+    
   
     voxels[gridX][gridY][gridZ] = true;
     voxelColors[gridX][gridY][gridZ] = color(255 - int(float(gridX) / gridSize * 255), int(float(gridY) / gridSize * 255), 255 - int(float(gridZ) / gridSize * 255));
@@ -177,8 +171,8 @@ void serialEvent (Serial port)
     
     //rotate X axis
     /*float tmpX = handX;
-    float tmpY = handY * cos(-gridRotY) - handDist * sin(-gridRotY);
-    float tmpZ = handY * sin(-gridRotY) + handDist * cos(-gridRotY);
+    float tmpY = handY * cos(gridRotY) - handDist * sin(gridRotY);
+    float tmpZ = handY * sin(gridRotY) + handDist * cos(gridRotY);
     
     handX = tmpZ * cos(gridRotX) + tmpX * cos(gridRotX);
     handY = tmpY;
@@ -206,6 +200,10 @@ void serialEvent (Serial port)
       gridY = int(handY / voxelSize) + (gridSize/2);
       gridZ = int(handDist / voxelSize) - gridSize;
       
+      /*gridX = int(handX / voxelSize);
+      gridY = int(handY / voxelSize);
+      gridZ = int(handDist / voxelSize);*/
+      
       glitchesSkipped = 0;
     }
     else
@@ -230,11 +228,11 @@ void serialEvent (Serial port)
         if (gridRotY > PI)
           gridRotY = PI - 0.00001f;
         if (gridRotY < 0)
-          gridRotY = 0.00001f;
-        
-        prevRotX = x1;
-        prevRotY = y1;
+          gridRotY = 0.00001f; 
       }
+      
+      prevRotX = x1;
+      prevRotY = y1;
       
       isRotating = true;
     }
@@ -249,5 +247,17 @@ void serialEvent (Serial port)
 
 void keyPressed()
 {
-  
+  if (key == 32)
+  {
+    for (int x = 0; x < voxels.length; x++)
+    {
+      for (int y = 0; y < voxels[0].length; y++)
+      {
+        for (int z = 0; z < voxels[0][0].length; z++)
+        {
+          voxels[x][y][z] = false;
+        }
+      }
+    }
+  }
 }

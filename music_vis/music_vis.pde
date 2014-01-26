@@ -18,57 +18,278 @@ ColorPicker cp;
 
 int br=0;
 boolean a=true;
-String mode = "sat";
+String mode = "flash";
+boolean paintbrush=false;
 
-int chue=220;
+int chue=0;
 int csat=100;
 int cbright=100;
 //220 green blue
 
 void setup()
 {
+  
+  colorMode(HSB,360,100,100);
   size(640, 480);
-
+  background(0,50,100);
   minim = new Minim(this);
 
  
-  myPort = new Serial(this,"COM4",9600);
-  myPort.bufferUntil('\n');
+  //myPort = new Serial(this,"COM4",9600);
+  //myPort.bufferUntil('\n');
  
   cp5 = new ControlP5(this);
   
   frameRate( 30 );
   smooth();
-  song = minim.loadFile("tiger.mp3", 2048);
+  song = minim.loadFile("demons.mp3", 2048);
   beat = new BeatDetect(song.bufferSize(), song.sampleRate());
   beat.setSensitivity(100);
   bl = new BeatListener(beat, song); 
   
+  colorMode(RGB,255);
+  textSize(24);
+  fill(255);
+  text("mode:", 10, 30); 
+  text("saturation:", 20, 160); 
+  text("color:", 20, 290); 
+
+  
+  colorMode(HSB,360,100,100);
+  
+  CColor g = new CColor();
+  CColor ccol = new CColor();
+  
+  g.setActive(color(75));
+  g.setBackground(color(50));
+  g.setForeground(color(0));
   cp5.addButton("Play")
     .setBroadcast(false)
-    .setPosition(300,200)
-    .setSize(50,20)
+    .setPosition(240,410)
+    .setSize(48,20)
     .setValue(0)
+    .setId(-1)
+    .setColor(g)
     .setBroadcast(true)
     ;  
     
-  cp5.addButton("Stop")
+  cp5.addButton("Pause")
     .setBroadcast(false)
-    .setPosition(300,240)
-    .setSize(50,19)
+    .setPosition(290,410)
+    .setSize(48,20)
     .setValue(1)
+    .setId(-1)
+    .setColor(g)
     .setBroadcast(true)
     ;
+    
+  cp5.addButton("Stop")
+    .setBroadcast(false)
+    .setPosition(340,410)
+    .setSize(48,20)
+    .setValue(1)
+    .setId(-1)
+    .setColor(g)
+    .setBroadcast(true)
+    ;
+    
+  ccol.setActive(color(0,csat,cbright));
+  
+  cp5.addButton("")
+    .setBroadcast(false)
+    .setPosition(20,300)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(5)
+    .setColor(setCCol(5))
+    .setBroadcast(true)
+    ;
+    
+  cp5.addButton(" ")
+    .setBroadcast(false)
+    .setPosition(120,300)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(65)
+    .setColor(setCCol(65))
+    .setBroadcast(true)
+    ;
+    
+  cp5.addButton("   ")
+    .setBroadcast(false)
+    .setPosition(220,300)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(110)
+    .setColor(setCCol(110))
+    .setBroadcast(true)
+    ;
+    //180,220
+  cp5.addButton("    ")
+    .setBroadcast(false)
+    .setPosition(320,300)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(180)
+    .setColor(setCCol(180))
+    .setBroadcast(true)
+    ;
+    
+  cp5.addButton("     ")
+    .setBroadcast(false)
+    .setPosition(420,300)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(220)
+    .setColor(setCCol(220))
+    .setBroadcast(true)
+    ;
+    
+  cp5.addButton("      ")
+    .setBroadcast(false)
+    .setPosition(520,300)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(320)
+    .setColor(setCCol(320))
+    .setBroadcast(true)
+    ;
+    
+  g.setActive(color(180));
+  g.setBackground(color(200));
+  g.setForeground(color(220));
+  cp5.addButton("50%")
+    .setBroadcast(false)
+    
+    .setColor(g)
+    .setPosition(20,175)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(-50)
+    .setBroadcast(true)
+    ;
+    
+  g.setActive(color(70));
+  g.setBackground(color(90));
+  g.setForeground(color(110));
+  
+  cp5.addButton("100%")
+    .setBroadcast(false)
+    .setPosition(120,175)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(-100)
+    .setColor(g)
+    .setBroadcast(true)
+    ;
+    
+  /*cp5.addCheckBox("CheckBox")
+    .setPosition(100,200)
+    .setSize(20,20)
+    .addItem("Light Graffiti Mode",0);
+    ;
+ */
+    
 } 
+
+
+public void controlEvent(ControlEvent c) {
+  if(c.getController().getId()>=0)
+  {
+   chue=c.getController().getId();
+   int[] background = HSVtoRGB(chue,int(csat/2),cbright);
+   background(color(background[0],background[1],background[2]));
+  }
+  else if(c.getController().getId()==-100)
+  {
+    csat=100;
+  }
+  else if(c.getController().getId()==-50)
+  {
+    csat=50;
+  }
+}
+
+public void Play(int theValue) {
+  song.play();
+}
+
+public void Pause(int theValue) {
+  song.pause();
+}
+
+public void Stop(int theValue) {
+  stop();
+  exit();
+}
+
+
+CColor setCCol(int h)
+{
+  colorMode(RGB,255,255,255);
+  int[] foreground = HSVtoRGB(h,csat,cbright);
+  int[]  background = HSVtoRGB(h,csat-10,cbright-20);
+  int[] active = HSVtoRGB(h,csat-50,cbright);
+  CColor col = new CColor();
+  col.setForeground(color(foreground[0],foreground[1],foreground[2]));
+  col.setBackground(color(background[0],background[1],background[2]));
+  col.setActive(color(active[0],active[1],active[2]) );
+  return col;
+}
+CColor setCCol(int h, int s)
+{
+  colorMode(RGB,255,255,255);
+  int[] foreground = HSVtoRGB(h,csat,cbright);
+  int[]  background = HSVtoRGB(h,csat-10,cbright-20);
+  int[] active = HSVtoRGB(h,int(csat/2),cbright);
+  CColor col = new CColor();
+  col.setForeground(color(foreground[0],foreground[1],foreground[2]));
+  col.setBackground(color(background[0],background[1],background[2]));
+  col.setActive(color(active[0],active[1],active[2]) );
+  return col;
+  
+}
+void paintbrushMode()
+{
+    colorMode(RGB,255,255,255);
+    int[] rgb = HSVtoRGB(chue,csat,cbright);
+    int[] rgb2 = HSVtoRGB(360,0,0);
+    if(myPort.available()>0) a=myPort.read()==97;
+    if(a)
+    {
+      myPort.write(byte(0xa5));
+      myPort.write(byte(0xc1));
+      myPort.write(byte(int(rgb[0])));
+      myPort.write(byte(int(rgb[1])));
+      myPort.write(byte(int(rgb[2])));
+      myPort.write(byte(0xa5));
+      myPort.write(byte(0xfe));
+      myPort.write(byte(rgb2[0]));
+      myPort.write(byte(rgb2[1]));
+      myPort.write(byte(rgb2[2]));
+      a=false;
+      while(true)
+      {
+       
+      }
+    }
+ 
+}
+
 void draw()
 {
-  rect(0,0,100,100);
+  /*rect(0,0,100,100);
   rect(100,0,100,100);
   rect(200,0,100,100);
   rect(300,0,100,100);
   rect(400,0,100,100);
-  rect(500,0,100,100);
+  rect(500,0,100,100);*/
   colorMode(HSB,360,100,100);
+  if(paintbrush)
+  { 
+    paintbrushMode();
+  }
+  else{
    if(mode=="flash")
    {
 
@@ -118,12 +339,13 @@ void draw()
     }
   }
 }
+}
 
 void send(float h, float s, float v)
 {
   colorMode(RGB,255,255,255);
   int[] rgb = HSVtoRGB(h,s,v);
-    if(myPort.available()>0) a=myPort.read()==97;
+    /*if(myPort.available()>0) a=myPort.read()==97;
     if(a)
     {
       myPort.write(byte(0xa5));
@@ -132,7 +354,7 @@ void send(float h, float s, float v)
       myPort.write(byte(int(rgb[1])));
       myPort.write(byte(int(rgb[2])));
       a=false;
-    }
+    }*/
     fill(rgb[0],rgb[1],rgb[2]);
 }
 
@@ -197,6 +419,7 @@ int[] getHSB(String mode, int range)
   return hsb;
 }
 
+
 int[] HSVtoRGB(float h, float s, float v)
 {
   s/=100;
@@ -250,18 +473,6 @@ int[] HSVtoRGB(float h, float s, float v)
   rgb[1]=int(b);
   rgb[2]=int(g);
   return rgb;
-}
-
-public void controlEvent(ControlEvent c) {
-}
-
-public void Play(int theValue) {
-  song.play();
-}
-
-public void Stop(int theValue) {
-  stop();
-  exit();
 }
 
 void stop()

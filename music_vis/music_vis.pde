@@ -68,61 +68,17 @@ void setup()
   
   CColor g = new CColor();
   
-  PFont pfont = createFont("ACaslonPro-Bold",16,true); // use true/false for smooth/no-smooth
-  ControlFont font = new ControlFont(pfont,16);
-  colorMode(RGB);
-  g.setActive(color(180));
+  //PFont pfont = createFont("ACaslonPro-Bold",16,true); // use true/false for smooth/no-smooth
+  //ControlFont font = new ControlFont(pfont,16);
+ /* g.setActive(color(180));
   g.setBackground(color(200));
-  g.setForeground(color(220));
-  cp5.addButton("Fade")
-    .setBroadcast(false)
-    
-    .setColor(g)
-    .setPosition(20,45)
-    .setSize(90,90)
-    .setValue(1)
-    .setId(-1)
-    .setBroadcast(true)
-    ;  
-  
-  cp5.addButton("Flash")
-    .setBroadcast(false)
-    
-    .setColor(g)
-    .setPosition(120,45)
-    .setSize(90,90)
-    .setValue(1)
-    .setId(-1)
-    .setBroadcast(true)
-    ;  
-    
-  
-  cp5.addButton("Multicolor")
-    .setBroadcast(false)
-    
-    .setColor(g)
-    .setPosition(220,45)
-    .setSize(90,90)
-    .setValue(1)
-    .setId(-1)
-    .setBroadcast(true)
-    ;  
-    
-   
-  cp5.addButton("Seizure")
-    .setBroadcast(false)
-    
-    .setColor(g)
-    .setPosition(320,45)
-    .setSize(90,90)
-    .setValue(1)
-    .setId(-1)
-    .setBroadcast(true)
-    ;  
-    
+  g.setForeground(color(220));*/
+
+  colorMode(RGB);
   g.setActive(color(75));
   g.setBackground(color(50));
   g.setForeground(color(0));
+  colorMode(HSB,360,100,100);
   
   cp5.addButton("Play")
     .setBroadcast(false)
@@ -173,6 +129,55 @@ void setup()
     .setColor(g)
     .setBroadcast(true)
     ;  
+    cp5.addButton("Fade")
+    .setBroadcast(false)
+    
+    .setColor(g)
+    .setPosition(20,45)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(-1)
+    .setBroadcast(true)
+    ;  
+    ((Button)(cp5.getController("Fade"))).captionLabel().style().marginLeft = 20;
+  
+  cp5.addButton("Flash")
+    .setBroadcast(false)
+    
+    .setColor(g)
+    .setPosition(120,45)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(-1)
+    .setBroadcast(true)
+    ;  
+    ((Button)(cp5.getController("Flash"))).captionLabel().style().marginLeft = 20;
+    
+  
+  cp5.addButton("Multicolor")
+    .setBroadcast(false)
+    
+    .setColor(g)
+    .setPosition(220,45)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(-1)
+    .setBroadcast(true)
+    ;  
+    ((Button)(cp5.getController("Multicolor"))).captionLabel().style().marginLeft = 10;
+    
+   
+  cp5.addButton("Seizure")
+    .setBroadcast(false)
+    
+    .setColor(g)
+    .setPosition(320,45)
+    .setSize(90,90)
+    .setValue(1)
+    .setId(-1)
+    .setBroadcast(true)
+    ;  
+    ((Button)(cp5.getController("Seizure"))).captionLabel().style().marginLeft = 15;
   
   cp5.addButton("")
     .setBroadcast(false)
@@ -248,9 +253,9 @@ void setup()
     .setBroadcast(true)
     ;
     
-  g.setActive(color(70));
-  g.setBackground(color(90));
-  g.setForeground(color(110));
+  g.setActive(color(80));
+  g.setBackground(color(100));
+  g.setForeground(color(120));
   
   cp5.addButton("100%")
     .setBroadcast(false)
@@ -277,27 +282,27 @@ void setup()
      .setFont(font2)
      .toUpperCase(false)
      ;
-       cp5.getController("Fade")
+  cp5.getController("Fade")
      .getCaptionLabel()
-     .setFont(font)
+     .setFont(font2)
      .toUpperCase(false)
      ;
    
   cp5.getController("Flash")
      .getCaptionLabel()
-     .setFont(font)
+     .setFont(font2)
      .toUpperCase(false)
      ;
    
   cp5.getController("Multicolor")
      .getCaptionLabel()
-     .setFont(font)
+     .setFont(font2)
      .toUpperCase(false)
      ;
   
   cp5.getController("Seizure")
      .getCaptionLabel()
-     .setFont(font)
+     .setFont(font2)
      .toUpperCase(false)
      ;
      
@@ -336,6 +341,7 @@ public void controlEvent(ControlEvent c) {
   if(c.getController().getId()>=0)
   {
    chue=c.getController().getId();
+   colorMode(RGB,255,255,255);
    int[] background = HSVtoRGB(chue,int(csat/2),cbright);
    backgroundColor=color(background[0],background[1],background[2]);
   }

@@ -15,37 +15,56 @@ Serial myPort;
 
 ControlP5 cp5;
 ColorPicker cp;
+DropdownList d1;
 
 int br=0;
 boolean a=true;
 String mode="Fade";
 boolean paintbrush=false;
+String s_song="tiger.mp3";
+color backgroundColor=130;
 
 int chue=220;
 int csat=100;
 int cbright=100;
+int cnt=0;
+
+String[] songs = {"Eye of the Tiger","Carry on my Wayward Son", "Burn", "Crystallize", "Demons", "Everybody Talks", "St. Jimmy"};
+String[] songMP3s = {"tiger.mp3","wayward.mp3","burn.mp3","crystallize.mp3","demons.mp3","everybodytalks.mp3","jimmy.mp3"};
+AudioPlayer[] songFiles = new AudioPlayer[songMP3s.length];
 //220 green blue
 
 void setup()
 {
-  
   colorMode(HSB,360,100,100);
-  size(650, 500);
-  background(0,50,100);
+  size(650, 700);
+  
   minim = new Minim(this);
 
- 
-  myPort = new Serial(this,"COM4",9600);
-  myPort.bufferUntil('\n');
+  for(int i=0;i<songFiles.length;i++)
+  {
+    songFiles[i]=minim.loadFile(songMP3s[i],2048);
+  }
+  song=songFiles[0];
+  //song = minim.loadFile("tiger.mp3", 2048);
+  beat = new BeatDetect(song.bufferSize(), song.sampleRate());
+  beat.setSensitivity(100);
+  bl = new BeatListener(beat, song); 
+  
+  //myPort = new Serial(this,"COM4",9600);
+  //myPort.bufferUntil('\n');
  
   cp5 = new ControlP5(this);
   
   frameRate( 30 );
   smooth();
-  song = minim.loadFile("tiger.mp3", 2048);
-  beat = new BeatDetect(song.bufferSize(), song.sampleRate());
-  beat.setSensitivity(100);
-  bl = new BeatListener(beat, song); 
+  
+  d1 = cp5.addDropdownList("songSelection")
+          .setPosition(20, 450)
+          .setSize(200,200)
+          .setId(-5)
+          ;
+  customize(d1);
   
   CColor g = new CColor();
   
@@ -107,7 +126,7 @@ void setup()
   
   cp5.addButton("Play")
     .setBroadcast(false)
-    .setPosition(240,410)
+    .setPosition(240,470)
     .setSize(48,20)
     .setValue(0)
     .setId(-1)
@@ -117,7 +136,7 @@ void setup()
     
   cp5.addButton("Pause")
     .setBroadcast(false)
-    .setPosition(290,410)
+    .setPosition(290,470)
     .setSize(48,20)
     .setValue(1)
     .setId(-1)
@@ -127,7 +146,7 @@ void setup()
     
   cp5.addButton("Stop")
     .setBroadcast(false)
-    .setPosition(340,410)
+    .setPosition(340,470)
     .setSize(48,20)
     .setValue(1)
     .setId(-1)
@@ -135,7 +154,25 @@ void setup()
     .setBroadcast(true)
     ;
     
-  //ccol.setActive(color(0,csat,cbright));
+  cp5.addButton("Robert's Button")
+    .setBroadcast(false)
+    .setPosition(20,600)
+    .setSize(80,20)
+    .setValue(0)
+    .setId(-1)
+    .setColor(g)
+    .setBroadcast(true)
+    ;  
+    
+  cp5.addButton("Michael's Button")
+    .setBroadcast(false)
+    .setPosition(120,600)
+    .setSize(80,20)
+    .setValue(0)
+    .setId(-1)
+    .setColor(g)
+    .setBroadcast(true)
+    ;  
   
   cp5.addButton("")
     .setBroadcast(false)
@@ -274,13 +311,33 @@ void setup()
     
 } 
 
+void customize(DropdownList ddl) {
+  // a convenience function to customize a DropdownList
+  ddl.setBackgroundColor(color(230));
+  ddl.setItemHeight(25);
+  ddl.setBarHeight(23);
+  ddl.captionLabel().set("choose a song");
+  ddl.captionLabel().style().marginTop = 7;
+  ddl.captionLabel().style().marginLeft = 3;
+  ddl.valueLabel().style().marginTop = 3;
+  for(int i=0;i<7;i++){
+    ddl.addItem(songs[i],i);
+  }
+  //ddl.addItems(songs);
+  ddl.setColorBackground(color(60));
+  ddl.setColorActive(color(255, 128));
+  
+}
 
 public void controlEvent(ControlEvent c) {
+  if (c.isController())
+  {
+    println("event from controller : "+c.getController().getValue()+" from "+c.getController());
   if(c.getController().getId()>=0)
   {
    chue=c.getController().getId();
    int[] background = HSVtoRGB(chue,int(csat/2),cbright);
-   background(color(background[0],background[1],background[2]));
+   backgroundColor=color(background[0],background[1],background[2]);
   }
   else if(c.getController().getId()==-100)
   {
@@ -289,11 +346,19 @@ public void controlEvent(ControlEvent c) {
   else if(c.getController().getId()==-50)
   {
     csat=50;
+  }  
+  }
+  else if (c.isGroup()) {
+    // check if the Event was triggered from a ControlGroup
+    println("event from group : "+c.getGroup().getValue()+" from "+c.getGroup());
+       song = songFiles[int(c.getGroup().getValue())];
+       bl.setSource(song);
   }
 }
 
 public void Play(int theValue) {
   song.play();
+  bl.setSource(song);
 }
 
 public void Pause(int theValue) {
@@ -320,7 +385,6 @@ public void Multicolor(int theValue) {
 public void Seizure(int theValue) {
   mode="Seizure";
 }
-
 
 CColor setCCol(int h)
 {
@@ -376,7 +440,8 @@ void paintbrushMode()
 
 void draw()
 {
-  
+  background(backgroundColor);
+  noStroke();
   colorMode(RGB,255);
   textSize(24);
   PFont title;
@@ -391,6 +456,7 @@ void draw()
   text("mode:", 20, 30); 
   text("saturation:", 20, 160); 
   text("color:", 20, 290); 
+  text("song:",20,415);
   
   /*rect(0,0,100,100);
   rect(100,0,100,100);
@@ -459,8 +525,8 @@ void send(float h, float s, float v)
 {
   colorMode(RGB,255,255,255);
   int[] rgb = HSVtoRGB(h,s,v);
-    if(myPort.available()>0) a=myPort.read()==97;
-    if(a)
+    //if(myPort.available()>0) a=myPort.read()==97;
+    /*if(a)
     {
       myPort.write(byte(0xa5));
       myPort.write(byte(0xff));
@@ -468,7 +534,7 @@ void send(float h, float s, float v)
       myPort.write(byte(int(rgb[1])));
       myPort.write(byte(int(rgb[2])));
       a=false;
-    }
+    }*/
     fill(rgb[0],rgb[1],rgb[2]);
 }
 
@@ -617,5 +683,12 @@ class BeatListener implements AudioListener
   void samples(float[] sampsL, float[] sampsR)
   {
     beat.detect(source.mix);
+  }
+  
+  void setSource(AudioPlayer a)
+  {
+    source.removeListener(this);
+    source = a;
+    source.addListener(this);
   }
 }

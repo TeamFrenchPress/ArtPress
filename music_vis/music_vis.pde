@@ -66,30 +66,24 @@ void setup()
  
   cp5 = new ControlP5(this);
   
+   
   frameRate( 30 );
   smooth(); 
+  cp5.setControlFont(new ControlFont(createFont("AgencyFB-Reg-28", 13), 13));
   
   PFont pfont;
   pfont = loadFont("AgencyFB-Reg-28.vlw");
   ControlFont font = new ControlFont(pfont);
-   //cp5.setControlFont(font);
   
   d1 = cp5.addDropdownList("songSelection")
           .setPosition(20, 450)
-          .setSize(200,150)
+          .setSize(300,150)
           .setId(-5)
-          //.setFont(font,28)
           ;
   customize(d1);
   
   CColor g = new CColor();
   
-  //PFont pfont = createFont("ACaslonPro-Bold",16,true); // use true/false for smooth/no-smooth
-  //ControlFont font = new ControlFont(pfont,16);
- /* g.setActive(color(180));
-  g.setBackground(color(200));
-  g.setForeground(color(220));*/
-//AgencyFB-Reg-28
   colorMode(RGB);
   g.setActive(color(75));
   g.setBackground(color(50));
@@ -98,8 +92,8 @@ void setup()
   
   cp5.addButton("Play")
     .setBroadcast(false)
-    .setPosition(20,600)
-    .setSize(60,25)
+    .setPosition(20,620)
+    .setSize(60,35)
     .setValue(0)
     .setId(-1)
     .setColor(g)
@@ -108,8 +102,8 @@ void setup()
     
   cp5.addButton("Pause")
     .setBroadcast(false)
-    .setPosition(90,600)
-    .setSize(60,25)
+    .setPosition(90,620)
+    .setSize(60,35)
     .setValue(1)
     .setId(-1)
     .setColor(g)
@@ -118,8 +112,8 @@ void setup()
     
   cp5.addButton("Stop")
     .setBroadcast(false)
-    .setPosition(160,600)
-    .setSize(60,25)
+    .setPosition(160,620)
+    .setSize(60,35)
     .setValue(1)
     .setId(-1)
     .setColor(g)
@@ -210,7 +204,7 @@ void setup()
     .setColor(setCCol(65))
     .setBroadcast(true)
     ;
-    //fc
+    
   cp5.addButton("   ")
     .setBroadcast(false)
     .setPosition(220,300)
@@ -220,7 +214,7 @@ void setup()
     .setColor(setCCol(110))
     .setBroadcast(true)
     ;
-    //180,220
+    
   cp5.addButton("    ")
     .setBroadcast(false)
     .setPosition(320,300)
@@ -328,7 +322,7 @@ void setup()
      .toUpperCase(false)
      ;
      
-   font.setSize(15);
+   font.setSize(20);
      
    cp5.getController("Play")
      .getCaptionLabel()
@@ -349,13 +343,12 @@ void setup()
      ;
      
      ;
-     //.getCaptionLabel()
-     //.setFont(font)
-     //.toUpperCase(false)
-     
-  
   ((Button)(cp5.getController("Draw3D"))).captionLabel().style().marginLeft = 50;
   ((Button)(cp5.getController("Light Graffiti"))).captionLabel().style().marginLeft = 40;
+  ((Button)(cp5.getController("Play"))).captionLabel().style().marginLeft = 10;
+  ((Button)(cp5.getController("Pause"))).captionLabel().style().marginLeft = 10;
+  ((Button)(cp5.getController("Stop"))).captionLabel().style().marginLeft = 10;
+  
   /*cp5.addCheckBox("CheckBox")
     .setPosition(100,200)
     .setSize(20,20)
@@ -366,18 +359,19 @@ void setup()
 } 
 
 void customize(DropdownList ddl) {
-  // a convenience function to customize a DropdownList
+  PFont pfont;
+  pfont = loadFont("AgencyFB-Reg-28.vlw");
+  ControlFont font = new ControlFont(pfont);
+  font.setSize(18);
+  ddl.getCaptionLabel().setFont(font).toUpperCase(false);
   ddl.setBackgroundColor(color(230));
-  ddl.setItemHeight(25);
-  ddl.setBarHeight(23);
+  ddl.setItemHeight(30);
+  ddl.setBarHeight(25);
   ddl.captionLabel().set("choose a song");
   ddl.captionLabel().style().marginTop = 7;
   ddl.captionLabel().style().marginLeft = 3;
   ddl.valueLabel().style().marginTop = 3;
-  for(int i=0;i<7;i++){
-    ddl.addItem(songs[i],i);
-  }
-  //ddl.addItems(songs);
+  ddl.addItems(songs);
   ddl.setColorBackground(color(60));
   ddl.setColorActive(color(255, 128));
   
@@ -418,6 +412,7 @@ public void Play(int theValue) {
 
 public void Pause(int theValue) {
   song.pause();
+  
 }
 
 public void Stop(int theValue) {

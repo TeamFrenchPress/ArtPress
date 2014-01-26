@@ -22,7 +22,7 @@ ColorPicker cp;
 DropdownList d1;
 
 
-boolean havePort=false;
+boolean havePort=true;
 int br=0;
 boolean a=true;
 String mode="Fade";
@@ -373,7 +373,7 @@ void customize(DropdownList ddl) {
   ddl.valueLabel().style().marginTop = 3;
   ddl.addItems(songs);
   ddl.setColorBackground(color(60));
-  ddl.setColorActive(color(255, 128));
+  ddl.setColorActive(color(150));
   
 }
 
@@ -505,7 +505,7 @@ void draw()
   textFont(title);
   text("ArtPress", 450, 50);
   textFont(title2);
-  text("by team FrenchPress",493,75);
+  text("by Team FrenchPress",493,75);
   mainFont = loadFont("ACaslonPro-Bold-24.vlw");
   textFont(mainFont);
   text("mode:", 20, 30); 

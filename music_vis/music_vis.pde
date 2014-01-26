@@ -21,7 +21,6 @@ ControlP5 cp5;
 ColorPicker cp;
 DropdownList d1;
 
-
 boolean havePort=true;
 int br=0;
 boolean a=true;
@@ -245,6 +244,40 @@ void setup()
     .setBroadcast(true)
     ;
     
+    CColor rg = new CColor();
+    colorMode(RGB);
+    rg.setActive(color(0,255,0));
+    rg.setBackground(color(0,220,0));
+    rg.setForeground(color(0,200,0));
+    
+   cp5.addButton("ON")
+    .setBroadcast(false)
+    .setPosition(490,637)
+    .setSize(25,30)
+    .setValue(1)
+    .setId(-1)
+    .setColor(rg)
+    .setBroadcast(true)
+    ;
+    
+    rg.setActive(color(255,0,0));
+    rg.setBackground(color(220,0,0));
+    rg.setForeground(color(200,0,0));
+    
+   cp5.addButton("OFF")
+    .setBroadcast(false)
+    .setPosition(515,637)
+    .setSize(25,30)
+    .setValue(1)
+    .setId(-1)
+    .setColor(rg)
+    .setBroadcast(true)
+    ;
+    
+    colorMode(HSB,360,100,100);
+   //font.setSize(10);
+
+     
   g.setActive(color(180));
   g.setBackground(color(200));
   g.setForeground(color(220));
@@ -342,21 +375,24 @@ void setup()
      .toUpperCase(false)
      ;
      
+   font.setSize(17);
+   cp5.getController("ON")
+     .getCaptionLabel()
+     .setFont(font)
+     .toUpperCase(false)
+     ;  
+     
+   cp5.getController("OFF")
+     .getCaptionLabel()
+     .setFont(font)
+     .toUpperCase(false)
      ;
   ((Button)(cp5.getController("Draw3D"))).captionLabel().style().marginLeft = 50;
   ((Button)(cp5.getController("Light Graffiti"))).captionLabel().style().marginLeft = 40;
   ((Button)(cp5.getController("Play"))).captionLabel().style().marginLeft = 10;
   ((Button)(cp5.getController("Pause"))).captionLabel().style().marginLeft = 10;
   ((Button)(cp5.getController("Stop"))).captionLabel().style().marginLeft = 10;
-  
-  /*cp5.addCheckBox("CheckBox")
-    .setPosition(100,200)
-    .setSize(20,20)
-    .addItem("Light Graffiti Mode",0);
-    ;
- */
-    
-} 
+}
 
 void customize(DropdownList ddl) {
   PFont pfont;
@@ -373,6 +409,7 @@ void customize(DropdownList ddl) {
   ddl.valueLabel().style().marginTop = 3;
   ddl.addItems(songs);
   ddl.setColorBackground(color(60));
+  ddl.setColorForeground(color(220));
   ddl.setColorActive(color(150));
   
 }
@@ -412,7 +449,6 @@ public void Play(int theValue) {
 
 public void Pause(int theValue) {
   song.pause();
-  
 }
 
 public void Stop(int theValue) {
@@ -434,6 +470,18 @@ public void Multi(int theValue) {
 
 public void Seizure(int theValue) {
   mode="Seizure";
+}
+
+public void ON(int theValue){
+  paintbrush=true;
+  myPort.write((byte)0xa5);
+  myPort.write((byte)0xff);
+  myPort.write((byte)0x00);
+  myPort.write((byte)0x00);
+  myPort.write((byte)0x00);
+}
+public void OFF(int theValue){
+  paintbrush=false;
 }
 
 public void Draw3D(int theValue) {
@@ -464,7 +512,7 @@ CColor setCCol(int h, int s)
   col.setActive(color(active[0],active[1],active[2]) );
   return col;
   
-}
+}/*
 void paintbrushMode()
 {
     colorMode(RGB,255,255,255);
@@ -490,7 +538,7 @@ void paintbrushMode()
       }
     }
  
-}
+}*/
 
 void draw()
 {
@@ -498,8 +546,11 @@ void draw()
   noStroke();
   colorMode(RGB,255);
   textSize(24);
-  PFont title, title2, mainFont;
+  PFont title, title2, mainFont, brushFont;
   fill(255);
+  brushFont = loadFont("ACaslonPro-Bold-18.vlw");
+  textFont(brushFont);
+  text("paintbrush mode:",446,625);
   title = loadFont("HarlowSolid-42.vlw");
   title2 = loadFont("Gabriola-20.vlw");
   textFont(title);
@@ -514,12 +565,7 @@ void draw()
   text("song:",20,415);
   
   colorMode(HSB,360,100,100);
-  if(paintbrush)
-  { 
-    paintbrushMode();
-  }
-  else{
-   if(mode=="Fade")
+  if(mode=="Fade")
    {
 
      int h=chue; int s=csat;
@@ -568,7 +614,6 @@ void draw()
     }
   }
 }
-}
 
 void send(float h, float s, float v)
 {
@@ -585,7 +630,6 @@ int[] getHSB(String mode, int range)
 {
   int[] hsb = new int[3];
   int h=chue; int s=csat; int b=cbright;
-  //50, purple, 180, blue
   if(mode=="brightsat")
   {
       b=100;
@@ -723,7 +767,11 @@ void serialEvent (Serial port)
   else
   {
     myPort.write(byte(0xa5));
+    if (paintbrush)
+      myPort.write(byte(0xc1));
+      else
     myPort.write(byte(0xff));
+    //myport.write(queuedWristbandByte);
     if (queuedSendColor != null)
     {
     myPort.write(byte((int)(queuedSendColor[0])));

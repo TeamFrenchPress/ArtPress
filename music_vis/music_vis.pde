@@ -7,6 +7,8 @@ import ddf.minim.effects.*;
 import processing.serial.*;
 import ddf.minim.*;
 
+import java.awt.Frame;
+
 Minim minim;
 AudioPlayer song;
 BeatDetect beat;
@@ -31,6 +33,8 @@ int cnt=0;
 String[] songs = {"Eye of the Tiger","Carry on my Wayward Son", "Burn", "Crystallize","Don't Stop Believin", "Demons", "Everybody Talks", "St. Jimmy","You're Gonna Go Far Kid","Zelda"};
 String[] songMP3s = {"tiger.mp3","wayward.mp3","burn.mp3","crystallize.mp3","dontstopbelievin.mp3","demons.mp3","everybodytalks.mp3","jimmy.mp3","gofarkid.mp3","Zelda.mp3"};
 AudioPlayer[] songFiles = new AudioPlayer[songMP3s.length];
+
+Draw3DFrame draw3dFrame;
 
 void setup()
 {
@@ -107,7 +111,7 @@ void setup()
     .setBroadcast(true)
     ;
     
-  cp5.addButton("Robert's Button")
+  cp5.addButton("Draw3D")
     .setBroadcast(false)
     .setPosition(20,650)
     .setSize(80,20)
@@ -335,7 +339,7 @@ public void controlEvent(ControlEvent c) {
   {
    chue=c.getController().getId();
    colorMode(RGB,255,255,255);
-   int[] background = HSVtoRGB(chue,int(csat/2),cbright);
+   int[] background = HSVtoRGB(chue,(int)(csat/2),cbright);
    backgroundColor=color(background[0],background[1],background[2]);
   }
   else if(c.getController().getId()==-100)
@@ -350,7 +354,7 @@ public void controlEvent(ControlEvent c) {
   else if (c.isGroup()) {
     // check if the Event was triggered from a ControlGroup
     println("event from group : "+c.getGroup().getValue()+" from "+c.getGroup());
-       song = songFiles[int(c.getGroup().getValue())];
+       song = songFiles[(int)(c.getGroup().getValue())];
        bl.setSource(song);
   }
 }
@@ -385,6 +389,10 @@ public void Seizure(int theValue) {
   mode="Seizure";
 }
 
+public void Draw3D(int theValue) {
+  draw3dFrame = new Draw3DFrame();
+}
+
 CColor setCCol(int h)
 {
   colorMode(RGB,255,255,255);
@@ -402,7 +410,7 @@ CColor setCCol(int h, int s)
   colorMode(RGB,255,255,255);
   int[] foreground = HSVtoRGB(h,csat,cbright);
   int[]  background = HSVtoRGB(h,csat-10,cbright-20);
-  int[] active = HSVtoRGB(h,int(csat/2),cbright);
+  int[] active = HSVtoRGB(h,(int)(csat/2),cbright);
   CColor col = new CColor();
   col.setForeground(color(foreground[0],foreground[1],foreground[2]));
   col.setBackground(color(background[0],background[1],background[2]));
@@ -420,9 +428,9 @@ void paintbrushMode()
     {
       myPort.write(byte(0xa5));
       myPort.write(byte(0xc1));
-      myPort.write(byte(int(rgb[0])));
-      myPort.write(byte(int(rgb[1])));
-      myPort.write(byte(int(rgb[2])));
+      myPort.write(byte((int)(rgb[0])));
+      myPort.write(byte((int)(rgb[1])));
+      myPort.write(byte((int)(rgb[2])));
       myPort.write(byte(0xa5));
       myPort.write(byte(0xfe));
       myPort.write(byte(rgb2[0]));
@@ -523,9 +531,9 @@ void send(float h, float s, float v)
     {
       myPort.write(byte(0xa5));
       myPort.write(byte(0xff));
-      myPort.write(byte(int(rgb[0])));
-      myPort.write(byte(int(rgb[1])));
-      myPort.write(byte(int(rgb[2])));
+      myPort.write(byte((int)(rgb[0])));
+      myPort.write(byte((int)(rgb[1])));
+      myPort.write(byte((int)(rgb[2])));
       a=false;
     }*/
     fill(rgb[0],rgb[1],rgb[2]);
@@ -584,7 +592,7 @@ int[] getHSB(String mode, int range)
   else if(mode=="Seizure")
   {
     s=100;
-    h=int(random(360));
+    h=(int)(random(360));
   }
   
   hsb[0]=h; hsb[1]=s; hsb[2]=b;
@@ -641,9 +649,9 @@ int[] HSVtoRGB(float h, float s, float v)
   r*=255;
   g*=255;
   b*=255;
-  rgb[0]=int(r);
-  rgb[1]=int(b);
-  rgb[2]=int(g);
+  rgb[0]=(int)(r);
+  rgb[1]=(int)(b);
+  rgb[2]=(int)(g);
   return rgb;
 }
 
@@ -682,5 +690,283 @@ class BeatListener implements AudioListener
     source.removeListener(this);
     source = a;
     source.addListener(this);
+  }
+}
+
+public class Draw3DFrame extends Frame
+{
+  public Draw3DFrame()
+  {
+    setBounds(0, 0, 1024, 768);
+    Draw3DApp app = new Draw3DApp();
+    add(app);
+    app.init();
+    show();
+  }
+}
+
+public class Draw3DApp extends PApplet 
+{
+  Serial port;
+
+  int x1= 0;
+  int y1 =0;
+  int size1 = 0;
+  
+  int x2= 0;
+  int y2 =0;
+  int size2 = 0;
+  
+  float radsPerPixel = QUARTER_PI / 1024f;
+  float ledDistance = 34.036f; //in mm
+  
+  float voxelSize = 10;
+  int gridSize = 20;
+  
+  int prevGridX = -1, prevGridY = -1, prevGridZ = -1;
+  int gridX = -1, gridY = -1, gridZ = -1;
+  int glitchesSkipped = 0;
+  float maxDrift = voxelSize * 0.25f;
+  float glitchDrift = 3f;
+  int maxGlitches = 3;
+  
+  int rotationSafeArea = 60; //pixel border from the edge of the screen
+  float rotationSpeed = QUARTER_PI * 0.01f; //radians per pixel
+  
+  int prevRotX = 0;
+  int prevRotY = 0;
+  
+  float gridRotX = 0;
+  float gridRotY = HALF_PI;
+  
+  boolean isRotating = false;
+  
+  boolean[][][] voxels;
+  color[][][] voxelColors;
+  
+  public Draw3DApp()
+  {
+    voxels = new boolean[gridSize][gridSize][gridSize];
+    voxelColors = new int[gridSize][gridSize][gridSize];
+  }
+  
+  public void setup()
+  {
+    size(1024,768, P3D);
+    port = new Serial(this, "COM7", 9600);
+    port.bufferUntil('\n');
+    float fov = PI/3;
+    float cameraZ = (height/2.0) / tan(fov/2.0);
+    perspective(fov, (float)width/(float)height, cameraZ/10.0, cameraZ*20.0);
+    //perspective(fov, (float)width/(float)height,0.0f, 500f);
+  }
+  
+  public void draw()
+  {
+    background(0,0,0);
+    fill(255,255,255);
+    if (size1>0)
+    ellipse(x1,y1,size1,size1);
+    if (size2>0)
+     ellipse(x2,y2,size2,size2);
+    if (size1 >0 && size2>0)
+    {
+      stroke(0,255,0);
+      line(x1,y1,x2,y2);
+    }
+    
+    lights();
+    noStroke();
+    fill(255, 255, 255);
+    pushMatrix();
+    //translate(512, 384, 50);
+    
+    float halfFullSize = (gridSize/2) * voxelSize;
+    float ballRadius = (gridSize/2) * voxelSize * 2 * sqrt(2);
+
+    camera(cos(gridRotX) * sin(gridRotY) * -ballRadius + halfFullSize,
+           cos(gridRotY) * ballRadius + halfFullSize,
+           sin(gridRotX) * sin(gridRotY) * -ballRadius + halfFullSize,
+           halfFullSize, halfFullSize, halfFullSize,
+           0, 1, 0);
+
+    /*int end = (int)(gridSize * voxelSize);
+    stroke(255, 255, 255);
+    line(0, 0, end, 0, 0, 0);
+    line(0, 0, 0, end, 0, 0);
+    line(0, 0, 0, 0, 0, end);
+    line(end, 0, end, 0, 0, 0);
+    line(end, 0, 0, end, 0, 0);
+    line(end, 0, 0, 0, 0, end);
+    line(0, end, end, 0, 0, 0);
+    line(0, end, 0, end, 0, 0);
+    line(0, end, 0, 0, 0, end);
+    line(0, 0, end, 0, end, 0);
+    line(0, 0, 0, end, end, 0);
+    line(end, end, 0, 0, end, end);
+    line(end, end, 0, 0, end, end);
+    line(end, end, 0, 0, end, end);*/
+
+    
+    for (int x = 0; x < voxels.length; x++)
+    {
+      for (int y = 0; y < voxels[0].length; y++)
+      {
+        for (int z = 0; z < voxels[0][0].length; z++)
+        {
+          pushMatrix();
+          //stroke(255, 255, 255);
+          if (voxels[x][y][z])
+          {
+            noStroke();
+            fill(voxelColors[x][y][z]);
+            translate(x * voxelSize, y * voxelSize, z * voxelSize);
+            box(voxelSize);
+          }
+          popMatrix();
+        }
+      }
+    }
+    
+    noFill();
+    stroke(255, 0, 0);
+    pushMatrix();
+    translate(gridX * voxelSize, gridY * voxelSize, gridZ * voxelSize);
+    box(voxelSize);
+    popMatrix();
+  
+    if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize && gridZ >= 0 && gridZ < gridSize)
+    {
+      voxels[gridX][gridY][gridZ] = true;
+      voxelColors[gridX][gridY][gridZ] = color(255 - (int)((float)gridX / gridSize * 255), (int)((float)gridY / gridSize * 255), 255 - (int)((float)gridZ / gridSize * 255));
+    }
+    
+    popMatrix();
+    
+    //println("x: " + gridRotX + "\t, y: " + gridRotY);
+  }
+  
+  public void serialEvent (Serial port)
+  {
+    String s = port.readString();
+    s = trim(s);
+    //println(s);
+    String[] coords =split(s, ',');
+    if (coords.length >4)
+    {
+      x1 = Integer.parseInt(coords[1]);
+      y1 = Integer.parseInt(coords[2]);
+      size1 = Integer.parseInt(coords[3])*5;
+      x2 = Integer.parseInt(coords[5]);
+      y2 = Integer.parseInt(coords[6]);
+      size2 = Integer.parseInt(coords[7])*5;
+      
+      isRotating = false;
+      
+      int dx = x2 - x1;
+      int dy = y2 - y1;
+      float distance = sqrt(dx*dx + dy*dy);
+      float angle = radsPerPixel * distance / 2;
+      float handDist = (ledDistance / 2) / tan(angle);
+      
+      float ptX = (x1 + x2) * 0.5f;
+      float ptY = (y1 + y2) * 0.5f;
+      
+      float handX = sin(radsPerPixel * (ptX - 512)) * handDist;
+      
+      float relativeVerticalAngle = (ptY - 384) * radsPerPixel;
+      float handY = sin(relativeVerticalAngle) * handDist;
+
+      //rotate X axis
+      /*float tmpX = handX;
+      float tmpY = handY * cos(gridRotY) - handDist * sin(gridRotY);
+      float tmpZ = handY * sin(gridRotY) + handDist * cos(gridRotY);
+      
+      handX = tmpZ * cos(gridRotX) + tmpX * cos(gridRotX);
+      handY = tmpY;
+      handDist = tmpZ * cos(gridRotX) - tmpX * cos(gridRotX);*/
+
+      println("(" + handX + ", " + handY + ", " + handDist + ")");
+      
+      int driftX = gridX - prevGridX;
+      int driftY = gridY - prevGridY;
+      int driftZ = gridZ - prevGridZ;
+      
+      float driftXZ = sqrt(driftX*driftX + driftZ*driftZ);
+      float drift = sqrt(driftY*driftY + driftXZ*driftXZ);
+     
+      if (drift >= glitchDrift)
+        glitchesSkipped++;
+        
+      if (drift <= maxDrift || glitchesSkipped > maxGlitches)
+      {
+        prevGridX = gridX;
+        prevGridY = gridY;
+        prevGridZ = gridZ;
+        
+        gridX = (int)(handX / voxelSize) + (gridSize/2);
+        gridY = (int)(handY / voxelSize) + (gridSize/2);
+        gridZ = (int)(handDist / voxelSize) - gridSize;
+        
+        /*gridX = (int)(handX / voxelSize);
+        gridY = (int)(handY / voxelSize);
+        gridZ = (int)(handDist / voxelSize);*/
+
+        glitchesSkipped = 0;
+      }
+      else
+        glitchesSkipped++;
+    }
+    else if (coords.length>1)
+    {
+      x1 = Integer.parseInt(coords[1]);
+      y1 = Integer.parseInt(coords[2]);
+      size1 = Integer.parseInt(coords[3])*5;
+      
+      size2=0;
+      
+      if (x1 > rotationSafeArea && x1 < width - rotationSafeArea && y1 > rotationSafeArea && y1 < height - rotationSafeArea)
+      {
+        if (isRotating)
+        {
+          gridRotX += (x1 - prevRotX) * rotationSpeed;
+          gridRotY += (y1 - prevRotY) * rotationSpeed;
+         
+          gridRotX %= TWO_PI;
+          if (gridRotY > PI)
+            gridRotY = PI - 0.00001f;
+          if (gridRotY < 0)
+            gridRotY = 0.00001f; 
+        }
+        
+        prevRotX = x1;
+        prevRotY = y1;
+        
+        isRotating = true;
+      }
+    }
+    else
+    {
+      size1=0;
+      size2=0;
+      isRotating = false;
+    }
+  }
+  
+  public void keyPressed()
+  {
+    if (key == 32)
+    {
+      for (int x = 0; x < voxels.length; x++)
+      {
+        for (int y = 0; y < voxels[0].length; y++)
+        {
+          for (int z = 0; z < voxels[0][0].length; z++)
+          {
+            voxels[x][y][z] = false;
+          }
+        }
+      }
+    }
   }
 }

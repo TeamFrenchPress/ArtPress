@@ -19,7 +19,7 @@ BeatDetect beat;
 BeatListener bl;
 Serial myPort;
 
-String com="COM9";
+String com="COM4";
 
 ControlP5 cp5;
 ColorPicker cp;
@@ -837,7 +837,7 @@ public class Draw3DFrame extends Frame
   
   public Draw3DFrame()
   {
-    setBounds(0, 0, 1024, 768);
+    setBounds(0, 0, 800, 600);
     app = new Draw3DApp();
     add(app);
     app.init();
@@ -901,8 +901,8 @@ public class Draw3DApp extends PApplet
   
   public void setup()
   {
-    size(1024,768, P3D);
-    port = new Serial(this, "COM7", 9600);
+    size(800,600, P3D);
+    port = new Serial(this, "COM6", 9600);
     port.bufferUntil('\n');
     float fov = PI/3;
     float cameraZ = (height/2.0) / tan(fov/2.0);
@@ -987,15 +987,15 @@ public class Draw3DApp extends PApplet
   
     if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize && gridZ >= 0 && gridZ < gridSize)
     {
-      if (isDrawing)
+      //if (isDrawing)
       {
         voxels[gridX][gridY][gridZ] = true;
         /*voxelColors[gridX][gridY][gridZ] = color(255 - (int)((float)gridX / gridSize * 255), (int)((float)gridY / gridSize * 255), 255 - (int)((float)gridZ / gridSize * 255));*/
         voxelColors[gridX][gridY][gridZ] = curColor;
       }
-      else if (isRemoving)
+      //else if (isRemoving)
       {
-        voxels[gridX][gridY][gridZ] = false;
+        //voxels[gridX][gridY][gridZ] = false;
       }
     }
     
@@ -1131,6 +1131,11 @@ public class Draw3DApp extends PApplet
           }
         }
       }
+    }
+    
+    if (key == 97)
+    {
+      exit();
     }
   }
   

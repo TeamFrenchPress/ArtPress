@@ -19,7 +19,7 @@ BeatDetect beat;
 BeatListener bl;
 Serial myPort;
 
-String com="COM4";
+String com="COM9";
 
 ControlP5 cp5;
 ColorPicker cp;
@@ -902,7 +902,7 @@ public class Draw3DApp extends PApplet
   public void setup()
   {
     size(800,600, P3D);
-    port = new Serial(this, "COM6", 9600);
+    port = new Serial(this, "COM11", 9600);
     port.bufferUntil('\n');
     float fov = PI/3;
     float cameraZ = (height/2.0) / tan(fov/2.0);
@@ -1176,7 +1176,7 @@ public class LightGraffitiFrame extends Frame
   
   public LightGraffitiFrame()
   {
-    setBounds(0, 0, 1024, 768);
+    setBounds(0, 0, 640, 480);
     app = new LightGraffitiApp();
     add(app);
     app.init();
@@ -1200,8 +1200,8 @@ ArrayList<Integer> intervals = new ArrayList<Integer>();
 color winning;
 
 void setup() {
-  size(1280, 720);
-  //size(640,480);
+  //size(1280, 720);
+  size(640,480);
   video = new Capture(this, width, height);
   opencv = new OpenCV(this, width, height);
   //myPort = new Serial(this,"COM9",9600);

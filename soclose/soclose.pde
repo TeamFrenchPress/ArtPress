@@ -34,7 +34,7 @@ void draw() {
   // filter(POSTERIZE,180);
   filter(DILATE);
   filter(ERODE);
- 
+ //filter(POSTERIZE,240);
   PVector loc = opencv.max();
 
   locx = int(loc.x);
@@ -90,7 +90,7 @@ void draw() {
   PVector aux = new PVector();
   for(PVector v : tests)
   {//(abs(v.x - loc.x) < 75) && (abs(v.y - loc.y) < 75) &&(abs(v.x - loc.x) < 100) && (abs(v.y - loc.y) < 100) &&
-   println(abs(v.x - loc.x), abs(v.y - loc.y));
+   //println(abs(v.x - loc.x), abs(v.y - loc.y));
    if((abs(v.x - loc.x) >5 || abs(v.y - loc.y) > 5) && (brightness(get(int(v.x),int(v.y))) > highest))
    {
     highest =  brightness(get(int(v.x),int(v.y)));
@@ -136,22 +136,25 @@ void draw() {
     
     if(winning != nextcolor)//nextcolor != opencv.in && nextcolor != slickblack  && winning != nextcolor)
     {
-      println(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
+      //println(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
       winning = color(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
+      
     }
+    
   }
   for(int p=0; p<points.size(); p++)
   {   
     if(points.size() > p+1){
        stroke(int(curveColors.get(p)));
        fill(int(curveColors.get(p)));
-       ellipse(points.get(p).x, points.get(p).y, 8, 8);
+       //ellipse(points.get(p).x, points.get(p).y, 8, 8);
       line(points.get(p).x, points.get(p).y, points.get(p+1).x,points.get(p+1).y);
        //draw soicles in between them
     }
   }
   
   points.add(new PVector(locbackupx,locbackupy));
+  //olor test = color(red(winning),green(winning),blue(winning),alpha(winning)-1);
   curveColors.add(winning);
   //stroke(winning);
   

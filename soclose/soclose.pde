@@ -109,8 +109,8 @@ void draw() {
   //
   /*color demoncolor = color(red(247),green(247),blue(247));
   color fuckthisshit = color(red(246),green(246),blue(246));
-  color slickblack = color(red(0),green(0),blue(0));
-  color nextcolor = color(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));*/
+  color slickblack = color(red(0),green(0),blue(0));*/
+  color nextcolor = color(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
   if(loc.x >= 0 && loc.y >= 0){
  // println(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
   ////ellipse(locx,locy,8,8);

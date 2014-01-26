@@ -15,7 +15,7 @@ void setup() {
   size(640, 480);
   video = new Capture(this, width, height);
   opencv = new OpenCV(this, width, height);
-  myPort = new Serial(this,"COM9",9600);
+  //myPort = new Serial(this,"COM9",9600);
   //myPort.wr
   video.start();
 }
@@ -74,34 +74,54 @@ void draw() {
   
  //println(opencv.max());
   float highest = 0.0;
-  PVector second = new PVector();
+  PVector aux = new PVector();
   for(PVector v : tests)
-  {
-   if((abs(v.x - loc.x) < 75) && (abs(v.y - loc.y) < 75) && (brightness(get(int(v.x),int(v.y))) > highest) && !(v.equals(loc)))
+  {//(abs(v.x - loc.x) < 75) && (abs(v.y - loc.y) < 75) &&(abs(v.x - loc.x) < 100) && (abs(v.y - loc.y) < 100) &&
+   if((brightness(get(int(v.x),int(v.y))) > highest))
    {
     highest =  brightness(get(int(v.x),int(v.y)));
-    second = v;
+    aux = v;
    }
    else
    {
    // println("ELSEWAT"); 
    }
   }
-  println(second);
-  int secondx = int(second.x);
-  int secondy = int(second.y);
-  fill(0);
-  stroke(0);
-  ellipse(secondx,secondy,8,8);
- 
+  //println(second);
   
-  ellipse(locx,locy,8,8);
-  strokeWeight(2);
-  if(winning != color(red(color(get(int(loc.x),int(loc.y+15)))),green(color(get(int(loc.x),int(loc.y+15)))),blue(color(get(int(loc.x),int(loc.y+15))))))
-  {
-   winning = color(red(color(get(int(loc.x),int(loc.y+15)))),green(color(get(int(loc.x),int(loc.y+15)))),blue(color(get(int(loc.x),int(loc.y+15)))));  
+  
+  
+  float locbackupx = loc.x;
+  float locbackupy = loc.y;
+  PVector hax = new PVector();
+  hax = PVector.sub(loc,aux);
+  hax.normalize();
+  hax.mult(7);
+  //println(loc);
+  loc.add(hax);
+
+  locx = int(loc.x);
+  locy = int(loc.y);
+  //ellipse(int(aux.x),int(aux.y),8,8);
+  //opencv.setROI(locx,locy,19,19);
+  //println(loc);
+  //println(locx,locy);
+  //
+  /*color demoncolor = color(red(247),green(247),blue(247));
+  color fuckthisshit = color(red(246),green(246),blue(246));
+  color slickblack = color(red(0),green(0),blue(0));
+  color nextcolor = color(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));*/
+  if(loc.x >= 0 && loc.y >= 0){
+ // println(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
+  ////ellipse(locx,locy,8,8);
+    strokeWeight(2);
+    
+    if(winning != nextcolor)//nextcolor != opencv.in && nextcolor != slickblack  && winning != nextcolor)
+    {
+      println(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
+      winning = color(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
+    }
   }
- 
   for(int p=0; p<points.size(); p++)
   {   
     if(points.size() > p+1){
@@ -113,7 +133,7 @@ void draw() {
     }
   }
   
-  points.add(new PVector(loc.x,loc.y));
+  points.add(new PVector(locbackupx,locbackupy));
   curveColors.add(winning);
   //stroke(winning);
   

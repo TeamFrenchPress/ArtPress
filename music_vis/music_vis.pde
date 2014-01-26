@@ -72,6 +72,7 @@ void setup()
   PFont pfont;
   pfont = loadFont("AgencyFB-Reg-28.vlw");
   ControlFont font = new ControlFont(pfont);
+   //cp5.setControlFont(font);
   
   d1 = cp5.addDropdownList("songSelection")
           .setPosition(20, 450)
@@ -97,7 +98,7 @@ void setup()
   
   cp5.addButton("Play")
     .setBroadcast(false)
-    .setPosition(20,500)
+    .setPosition(20,600)
     .setSize(60,25)
     .setValue(0)
     .setId(-1)
@@ -107,7 +108,7 @@ void setup()
     
   cp5.addButton("Pause")
     .setBroadcast(false)
-    .setPosition(90,500)
+    .setPosition(90,600)
     .setSize(60,25)
     .setValue(1)
     .setId(-1)
@@ -117,7 +118,7 @@ void setup()
     
   cp5.addButton("Stop")
     .setBroadcast(false)
-    .setPosition(130,500)
+    .setPosition(160,600)
     .setSize(60,25)
     .setValue(1)
     .setId(-1)
@@ -135,7 +136,7 @@ void setup()
     .setBroadcast(true)
     ;  
     
-  cp5.addButton("Michael's Button")
+  cp5.addButton("Light Graffiti")
     .setBroadcast(false)
     .setPosition(425,545)
     .setSize(175,60)
@@ -306,6 +307,7 @@ void setup()
      .getCaptionLabel()
      .setFont(font)
      .toUpperCase(false)
+    
      ;
   
   cp5.getController("Seizure")
@@ -320,7 +322,7 @@ void setup()
      .toUpperCase(false)
      ;
      
-  cp5.getController("Michael's Button")
+  cp5.getController("Light Graffiti")
      .getCaptionLabel()
      .setFont(font)
      .toUpperCase(false)
@@ -345,14 +347,15 @@ void setup()
      .setFont(font)
      .toUpperCase(false)
      ;
-   //cp5.getController("SongSelection")
+     
+     ;
      //.getCaptionLabel()
      //.setFont(font)
      //.toUpperCase(false)
-     //;
+     
   
   ((Button)(cp5.getController("Draw3D"))).captionLabel().style().marginLeft = 50;
-  ((Button)(cp5.getController("Michael's Button"))).captionLabel().style().marginLeft = 18;
+  ((Button)(cp5.getController("Light Graffiti"))).captionLabel().style().marginLeft = 40;
   /*cp5.addCheckBox("CheckBox")
     .setPosition(100,200)
     .setSize(20,20)

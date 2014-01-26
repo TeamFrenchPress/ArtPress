@@ -12,11 +12,12 @@ ArrayList<Integer> curveColors = new ArrayList<Integer>();
 color winning;
 
 void setup() {
-  size(1280, 720);
+  size(1280, 720,P2D);
   //size(640,480);
   video = new Capture(this, width, height);
   opencv = new OpenCV(this, width, height);
   //myPort = new Serial(this,"COM9",9600);
+  smooth();
   //myPort.wr
   video.start();
 }
@@ -25,9 +26,12 @@ int locx,locy;
 int mod = 35;
 
 void draw() {
-  
+
   opencv.loadImage(video);
-  image(video, 0, 0); 
+  pushMatrix();
+  scale(-1,1);
+  image(video.get(),-width,0);
+  popMatrix();
   if(drawnow){
   
   //filter(ERODE);
@@ -78,8 +82,8 @@ void draw() {
   tests.add(tempone);
   opencv.releaseROI();
   }
-  noFill();
-  stroke(0);
+  //noFill();
+  //stroke(0);
   //fill(0);
  /* rect(locx-20-150,locy-75,150,150);
   rect(locx+20,locy-75,150,150);
@@ -132,7 +136,7 @@ void draw() {
  // println(red(color(get(int(loc.x),int(loc.y)))),green(color(get(int(loc.x),int(loc.y)))),blue(color(get(int(loc.x),int(loc.y)))));
   
   ellipse(locx,locy,8,8);
-    strokeWeight(2);
+    strokeWeight(3);
     
     if(winning != nextcolor)//nextcolor != opencv.in && nextcolor != slickblack  && winning != nextcolor)
     {
@@ -142,6 +146,7 @@ void draw() {
     }
     
   }
+  
   for(int p=0; p<points.size(); p++)
   {   
     if(points.size() > p+1){

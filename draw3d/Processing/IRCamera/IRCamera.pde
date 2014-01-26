@@ -22,9 +22,16 @@ float maxDrift = voxelSize * 0.25f;
 float glitchDrift = 3f;
 int maxGlitches = 3;
 
-int spin;
+int rotationSafeArea = 60; //pixel border from the edge of the screen
+float rotationSpeed = QUARTER_PI * 0.01f; //radians per pixel
 
-float cameraAng = 30f;
+int prevRotX = 0;
+int prevRotY = 0;
+
+float gridRotX = 0;
+float gridRotY = HALF_PI;
+
+boolean isRotating = false;
 
 boolean[][][] voxels;
 color[][][] voxelColors;
@@ -63,8 +70,15 @@ void draw()
   pushMatrix();
   //translate(512, 384, 50);
   
-  camera(/*voxelSize * (gridSize + 1)*/ -voxelSize * 3, /*voxelSize * (gridSize + 1)*/ -voxelSize * 4, voxelSize * (gridSize + 5), (gridSize/2) * voxelSize, (gridSize/2) * voxelSize, (gridSize/2) * voxelSize, 0, 1, 0);
-  //camera(cos(cameraAng) * -voxelSize * 5, -voxelSize * 4, sin(cameraAng) * -voxelSize * 5, (gridSize/2) * voxelSize, (gridSize/2) * voxelSize, (gridSize/2) * voxelSize, 0, 1, 0);
+  float halfFullSize = (gridSize/2) * voxelSize;
+  float ballRadius = (gridSize/2) * voxelSize * 2 * sqrt(2);
+  
+  //camera(/*voxelSize * (gridSize + 1)*/ -voxelSize * 3, /*voxelSize * (gridSize + 1)*/ -voxelSize * 4, voxelSize * (gridSize + 5), (gridSize/2) * voxelSize, (gridSize/2) * voxelSize, (gridSize/2) * voxelSize, 0, 1, 0);
+  camera(cos(gridRotX) * sin(gridRotY) * -ballRadius + halfFullSize,
+         cos(gridRotY) * ballRadius + halfFullSize,
+         sin(gridRotX) * sin(gridRotY) * -ballRadius + halfFullSize,
+         halfFullSize, halfFullSize, halfFullSize,
+         0, 1, 0);
   
   /*int end = int(gridSize * voxelSize);
   stroke(255, 255, 255);
@@ -127,9 +141,7 @@ void draw()
   
   popMatrix();
   
-  spin++;
-  cameraAng += 0.1f;
-  cameraAng %= 360;
+  //println("x: " + gridRotX + "\t, y: " + gridRotY);
 }
 
 void serialEvent (Serial port)
@@ -138,22 +150,16 @@ void serialEvent (Serial port)
   s = trim(s);
   //println(s);
   String[] coords =split(s, ',');
-  if (coords.length>1)
+  if (coords.length >4)
   {
     x1 = Integer.parseInt(coords[1]);
     y1 = Integer.parseInt(coords[2]);
     size1 = Integer.parseInt(coords[3])*5;
-  }
-  else
-  {
-    size1=0;
-    size2=0;
-  }
-  if (coords.length >4)
-   {
     x2 = Integer.parseInt(coords[5]);
     y2 = Integer.parseInt(coords[6]);
     size2 = Integer.parseInt(coords[7])*5;
+    
+    isRotating = false;
     
     int dx = x2 - x1;
     int dy = y2 - y1;
@@ -169,7 +175,16 @@ void serialEvent (Serial port)
     float relativeVerticalAngle = (ptY - 384) * radsPerPixel;
     float handY = sin(relativeVerticalAngle) * handDist;
     
-    //println("(" + headX + ", " + headY + ", " + headDist + ")");
+    //rotate X axis
+    /*float tmpX = handX;
+    float tmpY = handY * cos(-gridRotY) - handDist * sin(-gridRotY);
+    float tmpZ = handY * sin(-gridRotY) + handDist * cos(-gridRotY);
+    
+    handX = tmpZ * cos(gridRotX) + tmpX * cos(gridRotX);
+    handY = tmpY;
+    handDist = tmpZ * cos(gridRotX) - tmpX * cos(gridRotX);*/
+    
+    println("(" + handX + ", " + handY + ", " + handDist + ")");
     
     int driftX = gridX - prevGridX;
     int driftY = gridY - prevGridY;
@@ -193,10 +208,42 @@ void serialEvent (Serial port)
       
       glitchesSkipped = 0;
     }
+    else
+      glitchesSkipped++;
   }
-  else 
+  else if (coords.length>1)
   {
+    x1 = Integer.parseInt(coords[1]);
+    y1 = Integer.parseInt(coords[2]);
+    size1 = Integer.parseInt(coords[3])*5;
+    
     size2=0;
+    
+    if (x1 > rotationSafeArea && x1 < width - rotationSafeArea && y1 > rotationSafeArea && y1 < height - rotationSafeArea)
+    {
+      if (isRotating)
+      {
+        gridRotX += (x1 - prevRotX) * rotationSpeed;
+        gridRotY += (y1 - prevRotY) * rotationSpeed;
+       
+        gridRotX %= TWO_PI;
+        if (gridRotY > PI)
+          gridRotY = PI - 0.00001f;
+        if (gridRotY < 0)
+          gridRotY = 0.00001f;
+        
+        prevRotX = x1;
+        prevRotY = y1;
+      }
+      
+      isRotating = true;
+    }
+  }
+  else
+  {
+    size1=0;
+    size2=0;
+    isRotating = false;
   }
 }
 

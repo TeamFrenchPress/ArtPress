@@ -15,9 +15,12 @@ BeatDetect beat;
 BeatListener bl;
 Serial myPort;
 
+String com="COM4";
+
 ControlP5 cp5;
 ColorPicker cp;
 DropdownList d1;
+
 
 int br=0;
 boolean a=true;
@@ -30,7 +33,7 @@ int csat=100;
 int cbright=100;
 int cnt=0;
 
-String[] songs = {"Eye of the Tiger","Carry on my Wayward Son", "Burn", "Crystallize","Don't Stop Believin", "Demons", "Everybody Talks", "St. Jimmy","You're Gonna Go Far Kid","Zelda"};
+String[] songs = {"Eye of the Tiger","Carry on my Wayward Son", "Burn", "Crystallize","Don't Stop Believin'", "Demons", "Everybody Talks", "St. Jimmy","You're Gonna Go Far Kid","Zelda"};
 String[] songMP3s = {"tiger.mp3","wayward.mp3","burn.mp3","crystallize.mp3","dontstopbelievin.mp3","demons.mp3","everybodytalks.mp3","jimmy.mp3","gofarkid.mp3","Zelda.mp3"};
 AudioPlayer[] songFiles = new AudioPlayer[songMP3s.length];
 
@@ -52,18 +55,23 @@ void setup()
   beat.setSensitivity(100);
   bl = new BeatListener(beat, song); 
   
-  //myPort = new Serial(this,"COM4",9600);
-  //myPort.bufferUntil('\n');
+  myPort = new Serial(this,com,9600);
+  myPort.bufferUntil('\n');
  
   cp5 = new ControlP5(this);
   
   frameRate( 30 );
-  smooth();
+  smooth(); 
+  
+  PFont pfont;
+  pfont = loadFont("AgencyFB-Reg-28.vlw");
+  ControlFont font = new ControlFont(pfont);
   
   d1 = cp5.addDropdownList("songSelection")
           .setPosition(20, 450)
-          .setSize(200,200)
+          .setSize(200,150)
           .setId(-5)
+          //.setFont(font,28)
           ;
   customize(d1);
   
@@ -74,7 +82,7 @@ void setup()
  /* g.setActive(color(180));
   g.setBackground(color(200));
   g.setForeground(color(220));*/
-
+//AgencyFB-Reg-28
   colorMode(RGB);
   g.setActive(color(75));
   g.setBackground(color(50));
@@ -83,8 +91,8 @@ void setup()
   
   cp5.addButton("Play")
     .setBroadcast(false)
-    .setPosition(240,470)
-    .setSize(48,20)
+    .setPosition(20,500)
+    .setSize(60,25)
     .setValue(0)
     .setId(-1)
     .setColor(g)
@@ -93,8 +101,8 @@ void setup()
     
   cp5.addButton("Pause")
     .setBroadcast(false)
-    .setPosition(290,470)
-    .setSize(48,20)
+    .setPosition(90,500)
+    .setSize(60,25)
     .setValue(1)
     .setId(-1)
     .setColor(g)
@@ -103,8 +111,8 @@ void setup()
     
   cp5.addButton("Stop")
     .setBroadcast(false)
-    .setPosition(340,470)
-    .setSize(48,20)
+    .setPosition(130,500)
+    .setSize(60,25)
     .setValue(1)
     .setId(-1)
     .setColor(g)
@@ -113,8 +121,8 @@ void setup()
     
   cp5.addButton("Draw3D")
     .setBroadcast(false)
-    .setPosition(20,650)
-    .setSize(80,20)
+    .setPosition(425,460)
+    .setSize(175,60)
     .setValue(0)
     .setId(-1)
     .setColor(g)
@@ -123,8 +131,8 @@ void setup()
     
   cp5.addButton("Michael's Button")
     .setBroadcast(false)
-    .setPosition(120,650)
-    .setSize(80,20)
+    .setPosition(425,545)
+    .setSize(175,60)
     .setValue(0)
     .setId(-1)
     .setColor(g)
@@ -174,7 +182,7 @@ void setup()
     .setId(-1)
     .setBroadcast(true)
     ;  
-    ((Button)(cp5.getController("Seizure"))).captionLabel().style().marginLeft = 15;
+    ((Button)(cp5.getController("Seizure"))).captionLabel().style().marginLeft = 10;
   
   cp5.addButton("")
     .setBroadcast(false)
@@ -195,7 +203,7 @@ void setup()
     .setColor(setCCol(65))
     .setBroadcast(true)
     ;
-    
+    //fc
   cp5.addButton("   ")
     .setBroadcast(false)
     .setPosition(220,300)
@@ -239,9 +247,9 @@ void setup()
   g.setActive(color(180));
   g.setBackground(color(200));
   g.setForeground(color(220));
+  
   cp5.addButton("50%")
     .setBroadcast(false)
-    
     .setColor(g)
     .setPosition(20,175)
     .setSize(90,90)
@@ -263,48 +271,82 @@ void setup()
     .setColor(g)
     .setBroadcast(true)
     ;
-    
-    
-  PFont pfont2 = createFont("Arial",16,true); // use true/false for smooth/no-smooth
-  ControlFont font2 = new ControlFont(pfont2,14);
+  
   
   cp5.getController("50%")
      .getCaptionLabel()
-     .setFont(font2)
+     .setFont(font)
      .toUpperCase(false)
      ;
      
   cp5.getController("100%")
      .getCaptionLabel()
-     .setFont(font2)
+     .setFont(font)
      .toUpperCase(false)
      ;
   cp5.getController("Fade")
      .getCaptionLabel()
-     .setFont(font2)
+     .setFont(font)
      .toUpperCase(false)
-     
      ;
    
   cp5.getController("Flash")
      .getCaptionLabel()
-     .setFont(font2)
+     .setFont(font)
      .toUpperCase(false)
      ;
    
   cp5.getController("Multi")
      .getCaptionLabel()
-     .setFont(font2)
+     .setFont(font)
      .toUpperCase(false)
      ;
   
   cp5.getController("Seizure")
      .getCaptionLabel()
-     .setFont(font2)
+     .setFont(font)
      .toUpperCase(false)
      ;
      
-    
+  cp5.getController("Draw3D")
+     .getCaptionLabel()
+     .setFont(font)
+     .toUpperCase(false)
+     ;
+     
+  cp5.getController("Michael's Button")
+     .getCaptionLabel()
+     .setFont(font)
+     .toUpperCase(false)
+     ;
+     
+   font.setSize(15);
+     
+   cp5.getController("Play")
+     .getCaptionLabel()
+     .setFont(font)
+     .toUpperCase(false)
+     ;
+     
+   cp5.getController("Pause")
+     .getCaptionLabel()
+     .setFont(font)
+     .toUpperCase(false)
+     ;
+     
+   cp5.getController("Stop")
+     .getCaptionLabel()
+     .setFont(font)
+     .toUpperCase(false)
+     ;
+   //cp5.getController("SongSelection")
+     //.getCaptionLabel()
+     //.setFont(font)
+     //.toUpperCase(false)
+     //;
+  
+  ((Button)(cp5.getController("Draw3D"))).captionLabel().style().marginLeft = 50;
+  ((Button)(cp5.getController("Michael's Button"))).captionLabel().style().marginLeft = 18;
   /*cp5.addCheckBox("CheckBox")
     .setPosition(100,200)
     .setSize(20,20)
@@ -425,14 +467,14 @@ void paintbrushMode()
     int[] rgb2 = HSVtoRGB(360,0,0);
     if(myPort.available()>0) a=myPort.read()==97;
     if(a)
-    {
+    { 
       myPort.write(byte(0xa5));
-      myPort.write(byte(0xc1));
-      myPort.write(byte((int)(rgb[0])));
-      myPort.write(byte((int)(rgb[1])));
-      myPort.write(byte((int)(rgb[2])));
-      myPort.write(byte(0xa5));
-      myPort.write(byte(0xfe));
+      myPort.write(byte(0xfc));
+      //myPort.write(byte((int)(rgb[0])));
+      //myPort.write(byte((int)(rgb[1])));
+      //myPort.write(byte((int)(rgb[2])));
+      //myPort.write(byte(0xa5));
+      //myPort.write(byte(0xfe));
       myPort.write(byte(rgb2[0]));
       myPort.write(byte(rgb2[1]));
       myPort.write(byte(rgb2[2]));
@@ -753,7 +795,7 @@ public class Draw3DApp extends PApplet
   public void setup()
   {
     size(1024,768, P3D);
-    port = new Serial(this, "COM7", 9600);
+    port = new Serial(this, "COM6", 9600);
     port.bufferUntil('\n');
     float fov = PI/3;
     float cameraZ = (height/2.0) / tan(fov/2.0);
@@ -878,13 +920,13 @@ public class Draw3DApp extends PApplet
       float handY = sin(relativeVerticalAngle) * handDist;
 
       //rotate X axis
-      /*float tmpX = handX;
+      float tmpX = handX;
       float tmpY = handY * cos(gridRotY) - handDist * sin(gridRotY);
       float tmpZ = handY * sin(gridRotY) + handDist * cos(gridRotY);
       
       handX = tmpZ * cos(gridRotX) + tmpX * cos(gridRotX);
       handY = tmpY;
-      handDist = tmpZ * cos(gridRotX) - tmpX * cos(gridRotX);*/
+      handDist = tmpZ * cos(gridRotX) - tmpX * cos(gridRotX);
 
       println("(" + handX + ", " + handY + ", " + handDist + ")");
       
